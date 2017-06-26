@@ -1,0 +1,360 @@
+%%%****************************************************************************
+%%% $Id: listing.tex,v 1.7 1995/05/04 13:07:55 gerd Exp $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%****************************************************************************
+\def\RCSrevision{\RCSstrip$Revision: 1.7 $}
+\def\RCSdate{\RCSstrip$Date: 1995/05/04 13:07:55 $}
+
+\documentstyle [fleqn,%......... smash mathematics leftward
+                fancybox,%...... 
+                psulhead,%...... use underlined heading
+                pcode,%......... obviously Prolog code
+                Doc/gntitle,%... my title layout
+                makeidx,%....... yes, we are making an index
+                Doc/rcs,%....... decode RCS strings
+                idtt,%.......... use | | for \verb
+                multicol,%...... 
+                dina4%.......... A4 sized paper
+                ]{book}%........ This is some kind of a book
+\pagestyle{ulheadings}
+
+\headheight=8mm
+\parindent=0pt
+
+\input{Doc/doc.cfg}
+
+\author{Gerd Neugebauer}
+\title{\ProTop \\\ProCom/CaPrI }
+\subtitle{Implementation Description}
+\version{\Version}
+\edition{\RCSrevision}
+\date{\today}
+\address{Fachbereich Informatik, Mathematik und Naturwissnschaft
+\\	 Hochschule f{\"u}r Technik, Wirtschaft und Kultur, Leipzig (FH)
+\\       Postfach 66,
+\\       04251 Leipzig (Germany)
+\\       Net: gerd@imn.th-leipzig.de
+}
+%------------------------------------------------------------------------------
+\vbadness=10000 %%%%%% I don't want to hear about underfull vboxes
+%------------------------------------------------------------------------------
+\newcommand\ProTop{ProTop}
+\newcommand\ProCom{ProCom}
+\newcommand\CaPrI{CaPrI}
+\newcommand\eclipse{ECL$^i$PS$^e$}
+%------------------------------------------------------------------------------
+\newfont\sfi{cmssi10}
+\def\FileId#1#2{{\small\it This is revision #2 of {\sfi \PrologFILE{}} written
+    by #1.}\bigskip}
+%------------------------------------------------------------------------------
+\renewcommand\PredicateBoxRule{1pt}     
+\renewcommand\PrologRuleWidth{.2pt}
+\PrologNumberLinestrue
+
+\renewcommand\PrologModule[2]{%
+        \newpage%
+        \markboth{The Module {\tt #1}}{The Module {\tt #1}}
+        \section{The Module {\tt #1}}}
+
+\renewcommand\PrologFile[2]{}
+
+\newfont\Pfont{cmitt10 scaled 900}
+\def\PrologFont{\Pfont}
+
+\def\PredicateIndex#1{\index{#1@{\tt #1}}}
+
+\PrologDialect{eclipse}
+%------------------------------------------------------------------------------
+\newenvironment{SampleCode}[1]{\begin{center}%
+  \begin{minipage}{#1}\xdef\WD{#1}%
+    \footnotesize\rule{\WD}{.1pt}\vspace{-\baselineskip}
+}{\vspace{-\baselineskip}\rule{\WD}{.1pt}\end{minipage}\end{center}}
+
+\newfont\itt{cmitt10}
+%------------------------------------------------------------------------------
+\newenvironment{BoxedSample}%
+{\begin{Sbox}\begin{minipage}{.8\textwidth}\obeylines\obeyspaces\itt%
+}{%
+ \end{minipage}\end{Sbox}%
+ \begin{center}%
+  \cornersize*{3ex}%
+  \Ovalbox{\mbox{\TheSbox}}
+ \end{center}%
+}
+%------------------------------------------------------------------------------
+\newenvironment{XREF}{%
+  \begingroup
+  \chapter*{Predicate Cross Reference}
+  \def\Spec##1##2{\item[##1]\ \dotfill\ {\sf ##2}\\\raggedright}%
+  \def\Used##1{{\scriptsize\sf ##1}\hfill}%
+  \columnseprule=.1pt
+  \multicolsep=21ptplus4ptminus3pt
+  \begin{multicols}{2}%
+  \small
+  \catcode`_=\active
+  \begin{description}%
+}{\end{description}%
+  \end{multicols}
+  \endgroup
+}
+\makeindex
+\begin{document} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+\small
+This documentaion has been typeset with \LaTeX. The following style options
+have been used: fancybox, pcode, makeidx, multicol, idtt, dina4. In addition
+the program |makeindex| has been used to generate the index.
+\normalsize\vfill
+Copyright {\copyright} 1995 Gerd Neugebauer
+\medskip
+
+Permission is granted to make and distribute verbatim copies of this manual
+provided the copyright notice and this permission notice are preserved on all
+copies.
+
+% Permission is granted to process this file through TeX and print the
+% results, provided the printed document carries a copying permission
+% notice identical to this one except for the removal of this paragraph
+% (this paragraph not being relevant to the printed manual).
+
+Permission is granted to copy and distribute modified versions of this manual
+under the conditions for verbatim copying, provided that the entire resulting
+derived work is distributed under the terms of a permission notice identical
+to this one.
+
+Permission is granted to copy and distribute translations of this manual into
+another language, under the above conditions for modified versions, except
+that this permission notice may be stated in a translation approved by the
+author.
+
+\newpage %---------------------------------------------------------------------
+\WithUnderscore{\tableofcontents}
+\newpage %---------------------------------------------------------------------
+
+\chapter*{Introduction}
+
+This document contains the documented source code of the automated theorem
+proving system \ProTop/\ProCom/\CaPrI. This system is made up of several
+relatively indepenent modules.
+\begin{description}
+\item[\ProTop] 
+  is a shell to run automated theorem provers. Certain tasks are performed by
+  \ProTop{} to release the theorem provers from this burden. E.g. measuring
+  times and generating a report of the activities are things that can be left
+  to \ProTop. A scripting language allows the user to describe several
+  experiments and let \ProTop{} carry them out later.
+
+  Currently several theorem provers are availlable under the control of
+  \ProTop. These are the external provers Setheo and Otter which are run in a
+  separate process. The interpreter pool uses the internal representation of
+  \ProTop{} and searches directly for a proof. The compiler \ProCom{}
+  generates an intermediate Prolog Program which is run to perform the proof
+  search.
+
+\item[\ProCom]
+  is a theorem prover based on the PTTP paradigm. This means that an
+  intermediate Prolog program is generated which performs the search for a
+  proof. \ProCom{} is designed rather general utilizing classical software
+  technology like compiler and linker techniques and partial evaluation.
+  
+\item[\CaPrI]
+  is the calculi programming interface to \ProCom. This interface allows the
+  user to specify the calculus used for the final prover. Thus it is possible
+  to exchange the inference engine easily.
+  
+\end{description}
+
+
+\chapter{Toplevel and Report Generator}
+
+\PrologInput{main.pl}
+\PrologInput{ProTop/protop.pl}
+\PrologInput{ProTop/proof_report.pl}
+\PrologInput{ProTop/proof_tree.pl}
+\PrologInput{ProTop/report_summary.pl}
+\section{Sample configuration file}%
+\markboth{ProTop Configuration File}{ProTop Configuration File}
+\Listing{ProTop/protop.cfg}
+
+\chapter{System Support}
+\PrologInput{System/options.pl}
+\PrologInput{System/hook.pl}
+%\PrologInput{System/pipe.pl}
+\PrologInput{System/message.pl}
+\PrologInput{System/time.pl}
+\PrologInput{System/eq_member.pl}
+\PrologInput{System/maplist.pl}
+\PrologInput{System/qsort.pl}
+\PrologInput{System/unify.pl}
+\PrologInput{System/find_file.pl}
+\PrologInput{System/dynamic_module.pl}
+\PrologInput{System/os.pl}
+\PrologInput{System/proof.pl}
+\PrologInput{System/add_arg.pl}
+\PrologInput{System/varlist.pl}
+
+\chapter{Parsing and Internal Representation}
+\PrologInput{System/op_def.pl}
+\PrologInput{System/literal.pl}
+\PrologInput{System/matrix.pl}
+\PrologInput{System/parse.pl}
+\PrologInput{Prepare/complete_goals.pl}
+\PrologInput{Prepare/prove.pl}
+\section{Sample configuration file}
+\Listing{Prepare/prove.cfg}
+
+\chapter{Input Filters}
+\PrologInput{System/run_filter.pl}
+\PrologInput{Filter/none.pl}
+\PrologInput{Filter/tee.pl}
+\PrologInput{Filter/mpp.pl}
+\PrologInput{Filter/mult_taut_filter.pl}
+\PrologInput{Filter/equality_axioms.pl}
+\PrologInput{Filter/E_flatten.pl}
+
+\chapter{Using external Provers}
+\PrologInput{Otter/otter.pl}
+\section{Otter configuration file}
+\Listing{Otter/otter.cfg}
+
+\PrologInput{Setheo/setheo.pl}
+\section{Setheo configuration file}
+\Listing{Setheo/setheo.cfg}
+
+\chapter{Executing Prover Code}
+\PrologInput{Pool/pool.pl}
+\PrologInput{System/run_prover.pl}
+
+\chapter{ProCom/CaPrI}
+\PrologInput{ProCom/capri.pl}
+\PrologInput{ProCom/procom.pl}
+\PrologInput{ProCom/capricore.pl}
+\PrologInput{ProCom/p_body.pl}
+\PrologInput{ProCom/p_options.pl}
+\PrologInput{ProCom/p_driver.pl}
+\PrologInput{ProCom/p_goal.pl}
+\PrologInput{ProCom/p_put.pl}
+\PrologInput{ProCom/linker.pl}
+\PrologInput{ProCom/optimize.pl}
+\PrologInput{ProCom/unfold.pl}
+\section{ProCom configuration file}
+\Listing{ProCom/procom.cfg}
+
+
+\chapter{ProCom/CaPrI Search Strategies}
+
+\input{Doc/search}
+
+\PrologInput{ProCom/p__depth_first.pl}
+\PrologInput{ProCom/p__iterative_deepening.pl}
+\PrologInput{ProCom/p__iterative_inferences.pl}
+\PrologInput{ProCom/p__iterative_widening.pl}
+
+
+\chapter{CaPrI Description Files}
+
+\PrologInput{Capri/extension_procedure.pl}
+\PrologInput{Capri/me1.pl}
+\PrologInput{Capri/me2.pl}
+\PrologInput{Capri/me3.pl}
+\PrologInput{Capri/me_para.pl}
+
+\chapter{ProCom Libraries}
+
+\renewcommand\PrologFile[2]{%
+        \markboth{The Library {\tt #1}}{The Library {\tt #1}}
+        \subsection{The Library {\tt #1}}}
+
+\section{Prolog Initialization}
+
+\PrologInput{ProCom/default/init.pl}
+\PrologInput{ProCom/eclipse/init.pl}
+\PrologInput{ProCom/quintus/init.pl}
+
+\PrologInput{ProCom/eclipse/module.pl}
+\PrologInput{ProCom/quintus/module.pl}
+
+
+\newpage
+\section{Path Management}
+
+\PrologInput{ProCom/default/path.pl}
+\PrologInput{ProCom/default/path-simple.pl}
+\PrologInput{ProCom/default/path-linear.pl}
+\PrologInput{ProCom/eclipse/path-regular.pl}
+
+\newpage
+\section{Tracer and Debugger}
+
+\PrologInput{ProCom/default/debugger.pl}
+\PrologInput{ProCom/eclipse/debugger.pl}
+\PrologInput{ProCom/default/no-debugger.pl}
+\PrologInput{ProCom/default/tracer.pl}
+\PrologInput{ProCom/eclipse/tracer.pl}
+
+\newpage
+\section{As Time Goes By}
+
+\PrologInput{ProCom/default/no-time.pl}
+\PrologInput{ProCom/default/time.pl}
+\PrologInput{ProCom/eclipse/time.pl}
+\PrologInput{ProCom/quintus/time.pl}
+
+\newpage
+\section{Unification}
+
+\PrologInput{ProCom/default/unify-no-oc.pl}
+\PrologInput{ProCom/eclipse/unify.pl}
+\PrologInput{ProCom/quintus/unify.pl}
+\PrologInput{ProCom/default/member.pl}
+
+\newpage
+\section{Lemmas}
+
+\PrologInput{ProCom/default/lemma.pl}
+\PrologInput{ProCom/default/no-lemma.pl}
+
+\newpage
+\section{User Interaction}
+
+\PrologInput{ProCom/default/show.pl}
+\PrologInput{ProCom/eclipse/show.pl}
+
+\PrologInput{ProCom/default/more.pl}
+\PrologInput{ProCom/eclipse/more.pl}
+
+\PrologInput{ProCom/default/proof_limit.pl}
+\PrologInput{ProCom/eclipse/proof_limit.pl}
+
+\PrologInput{ProCom/default/proof.pl}
+\PrologInput{ProCom/eclipse/proof.pl}
+
+
+\newpage
+\section{Search Strategies}
+
+\PrologInput{ProCom/eclipse/search_df.pl}
+\PrologInput{ProCom/eclipse/search_id.pl}
+\PrologInput{ProCom/eclipse/search_ii.pl}
+
+\chapter{Misc}%
+
+\Listing{../Makefile}
+
+\input{xref.ltx}
+
+\markboth{Index}{Index}
+\WithUnderscore{\printindex}
+
+\end{document} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

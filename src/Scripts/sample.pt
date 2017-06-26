@@ -1,0 +1,73 @@
+%%%****************************************************************************
+%%%* $Id: sample.pt,v 1.2 1995/05/01 19:47:03 gerd Exp $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%============================================================================
+%%
+%% Sample ProCom script file
+%%
+
+include(ancient).
+
+%--- Define a useful macro.
+experiment(File,Info) := 
+	report text(Info),
+	prove(File).
+
+%--- Reset the options to their default values.
+reset_options.
+
+%--- Initialize the log file.
+report init   ".prover.log".
+report title  "Some experiments".
+report author "Gerd Neugebauer".
+
+%--- Set some options and run an experiment
+  'ProTop:verbose'	= off.
+  verbose		= off.
+  'run:remove_prover'	= off.
+  'ProCom:show'		= off.
+  'run:time_limit'	= 1000.
+
+report section "Optimized".
+report label   eder12o.
+experiment('eder1-2',"The example $eder_{1,2}$").
+
+%--- Reset options and another experiment.
+  'ProCom:optimize'	= off.
+
+report section "Unoptimized".
+report label   eder12uo.
+experiment('eder1-2',"The example $eder_{1,2}$ without optimizer").
+
+%--- Reset options and another experiment.
+  'ProCom:optimize'	= off.
+  'ProCom:expand'	= off.
+
+report section "Unexpanded".
+report label   eder12ue.
+experiment('eder1-2',"The example $eder_{1,2}$ without optimizer and expander").
+
+
+define_table(table_summary,
+	[head("THE RESULTS"),
+	 subhead("Summary of all experiments"),
+	 titles("","Read","Goal","Conn","Compile","Run"),
+	 row(section(X),
+	 	time("clauses read ",X),
+	 	time("Red complete_goals:",X),
+	 	time("Red connection_graph:",X),
+	 	time("Compile time",X),
+		time(runtime,X)),
+	 each(X)
+	]).
+
+generate_report.

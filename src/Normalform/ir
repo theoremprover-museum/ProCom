@@ -1,0 +1,3 @@
+and(predicate(p(A)),predicate(q(B))).
+or(predicate(p(A)),predicate(q(B))).
+exists([A],and(predicate(p(A)),predicate(q(B)))).

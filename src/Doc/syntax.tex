@@ -1,0 +1,114 @@
+%%%****************************************************************************
+%%% $Id: syntax.tex,v 1.2 1995/01/27 13:45:38 gerd Exp $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%****************************************************************************
+
+\def\SYNTAX#1.{\begin{itemize}\item[]\(#1\) \end{itemize}}
+
+%------------------------------------------------------------------------------
+\section{The Input Language}
+
+\subsection{Basics}
+
+\ProCom{} is  currently able to process problems  in  clausal form. The chosen
+syntax is a superset of pure  Prolog, i.e. without  built-in predicates of any
+kind.  Since  the  Prolog  reading  apparatus  is  used  several features  are
+inherited directly:
+\begin{description}
+  \item [Variables\index{variable}] are written with an initial capital letter.
+
+  \item [Functors\index{functor}  and constants\index{constant}] usually start
+    with  a lower  case letter.  Additionally  some  predefined  operators are
+    defined as infix, e.g. |=|, |<|, |>|, and others.
+
+  \item [Terms\index{term}] are built from functors and variables as usual (in
+    Prolog).
+
+  \item [Comments\index{comment}] are anything starting with a |%| up to the
+    end  of the line.  Additionally  C-style comments, i.e. starting with |/*|
+    and ending in |*/|, can be used.
+\end{description}
+
+
+\subsection{Literals}
+\index{literal}
+
+A  literal  is a predicate  with  an optional sign.   Everything  which has an
+operator not  treated special is considered  as a predicate. Special operators
+are |,|, |;|, |:-|, |<-|, |->|, |?-|, |::|, the list constructor and the empty
+list constant |[]|.
+
+A positive literal can  be optionally marked with  the prefix |++|. Internally
+the positive sign  is added where required. The  negation sign is |-| or |--|.
+Internally |--| is used only.
+
+
+\subsection{Clauses}
+\index{clause}
+
+\SYNTAX |[| L_1 |,| \ldots|,| L_n |]|.
+%
+The simplest  --- but  hard   to read ---  form  of  a  clause consists of   a
+(nonempty) list of literals. They are stored as they are.
+
+
+\SYNTAX H_1|;|\ldots|;|H_n \,|:-|\, T_1|,|\ldots|,|T_m.
+%
+This is the general  form of a clause  in  extended Prolog notation.  The head
+literals $H_1,\ldots  H_n$  denote  the   negative  literals. Thus  they   are
+implicitly  negated when   the internal list  representation is  constructed.
+Nevertheless explicit negation using the |-| operator is permitted.
+
+Other degenerate variants --- the head or the tail are  empty --- are provided
+as well.
+
+
+\SYNTAX |:-|\, T_1|,|\ldots|,|T_m.
+%
+This rule parses the degenerate form of the extended Prolog notation where the
+head is empty. Note that  in contrast to Prolog there  is a difference to  the
+|?-| operator.
+
+
+\SYNTAX  H_1|;|\ldots|;|H_n \,|<-|\, T_1|,|\ldots|,|T_m.
+%
+The forms incorporating the |<-| operator are simply syntactic variants of the
+same forms using the |:-| operator.
+
+
+\SYNTAX |<-|\, T_1|,|\ldots|,|T_m.
+%
+This form is simply mapped to the corresponding |:-| variant.
+
+
+\SYNTAX |?-| Goal.
+%
+
+
+\SYNTAX L_1 |;|\ldots|;| L_n.
+\SYNTAX L_1 |,|\ldots|,| L_n.
+%
+A disjunction  is interpreted as  a degenerated left  hand side of an extended
+Prolog clause. Thus it is negated while translated into a list.
+
+
+\subsection{Labels}
+\index{label}
+
+\SYNTAX Label |::| Clause.
+%
+Any clause can have arbitrary information assigned to it.  This is done in two
+forms. One form is to mark a clause as goal clause with the |?-| operator. The
+more general form implemented here is to write a label  in front of the clause
+separated  by the |::| operator.   The label {\em Label}\/  is  stored in  the
+Prolog database as |'Label'(|{\em Label}|,|{\em Index}|)|.
+

@@ -1,0 +1,87 @@
+%%*****************************************************************************
+%% $Id: matrix-doc.tex,v 1.1 1995/03/09 14:22:42 gerd Exp $
+%%*****************************************************************************
+%% Author: Gerd Neugebauer
+%%-----------------------------------------------------------------------------
+\documentstyle [11pt,%.......... 
+                dina4,%......... use european A4 size paper
+                fleqn,%......... smash mathematics leftward
+                fancybox,%...... 
+                floatfig,%...... floating text around figures
+                psfig,%......... 
+                verbatim,%...... use input of files
+                pcode,%......... obviously Prolog code
+                gntitle,%....... 
+                old-fonts,%..... compatibility pack for xfig figures
+                makeidx,%....... yes, we are making an index
+                named,%......... 
+                rcs,%........... decode RCS information
+                psulhead,%...... use underlined heading
+                idtt,%.......... use | | for verbatim
+                epic%........... 
+                ]{book}%..... 
+\pagestyle{ulheadings}
+
+\setlength{\headheight}{3ex}
+\setlength{\parindent}{0Em}
+\setlength{\parskip}{1ex}
+
+\author{Gerd Neugebauer}
+\title{   \ProCom/CaPrI
+        \\and the Shell \ProTop}
+\subtitle{User's Guide}
+\version{\Version}
+\edition{\RCSrevision}
+\date{\today}
+\address{Fachbereich Informatik, Mathematik und Naturwissnschaft
+\\	 Hochschule f{\"u}r Technik, Wirtschaft und Kultur, Leipzig
+\\       Postfach 66
+\\       04251 Leipzig (Germany)
+\\       Net: gerd@imn.th-leipzig.de
+}
+\input{doc.cfg}
+
+\newenvironment{Sample}{%
+        \begin{center}
+          \begin{minipage}{.5\textwidth}
+            \rule{\textwidth}{.1pt}\vspace{-1ex}%
+            }{%
+            \vspace{-2ex}\rule{\textwidth}{.1pt}
+          \end{minipage}
+        \end{center}%
+        }
+
+\let\PrologFILE=\relax
+\let\PredicateFileExtension=\relax
+
+\newcommand\eclipse{ECL\(^i\)PS\(^e\)}
+\newcommand\CaPrI{CaPrI}
+\newcommand\ProCom{ProCom}
+\newcommand\ProTop{{Pro\hspace{-.1em}Top}}
+
+\newfont\itt{cmitt10}
+
+\newenvironment{BoxedSample}%
+{\begin{Sbox} \begin{minipage}{.8\textwidth}\obeylines\obeyspaces\itt%
+}{%
+ \end{minipage} \end{Sbox}%
+ \begin{center}%
+  \cornersize*{3ex}%
+  \Ovalbox{\mbox{\TheSbox}}
+ \end{center}%
+}
+
+\renewcommand\textfraction{.1}
+\renewcommand\topfraction{1}
+\renewcommand\bottomfraction{1}
+
+\begin{document}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{matrix}
+
+\end{document}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Local Variables: 
+% mode: latex
+% TeX-master: nil
+% End: 

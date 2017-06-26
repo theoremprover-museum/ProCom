@@ -1,0 +1,20 @@
+
+p(1).
+p(2).
+
+#op(900,xfy,(<=>)).
+#define (A<=>B) = equivalent(A,B).
+
+#define mac = 12.
+
+p(X) <=> q(X).
+
+#if defined(mac/0).
+q(yes).
+q(more).
+#else.
+q(no).
+#endif.
+
+try(mac).
+

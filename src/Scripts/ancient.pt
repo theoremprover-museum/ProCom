@@ -1,0 +1,106 @@
+%%%****************************************************************************
+%%%* $Id: ancient.pt,v 1.3 1995/05/04 13:07:55 gerd Exp $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%============================================================================
+%%
+%% This file provides some macros for backward compatibility.
+%% Ancient constructs of ProTop which are no longer supported by the kernel
+%% are defined here to allow old scripts to work.
+%%
+
+%------------------------------------------------------------------------------
+report_matrix := 
+	writeln("*** `report_matrix' is obsolete now. Use the option prove:log_items instead").
+%------------------------------------------------------------------------------
+report_options := 
+	writeln("*** `report_options' is obsolete now. Use the option prove:log_items instead").
+%------------------------------------------------------------------------------
+op(900,fx,report_title).
+report_title(Title) := 
+	writeln("*** `report_title' has been renamed to report(title( ))"),
+	report(title(Tile)).
+%------------------------------------------------------------------------------
+op(900,fx,report_author).
+report_author(Author) := 
+	writeln("*** `report_author' has been renamed to report(author( ))"),
+	report(author(Author)).
+%------------------------------------------------------------------------------
+op(900,fx,report_section).
+report_section(Section) := 
+	writeln("*** `report_section' has been renamed to report(section( ))"),
+	report(section(Section)).
+%------------------------------------------------------------------------------
+op(900,fx,report_label).
+report_label(Label) := 
+	writeln("*** `report_label' has been renamed to report(label( ))"),
+	report(label(Label)).
+%------------------------------------------------------------------------------
+op(900,fx,report_text).
+report_text(Text) := 
+	writeln("*** `report_text' has been renamed to report(text( ))"),
+	report(text(Text)).
+%------------------------------------------------------------------------------
+op(900,fx,report_comment).
+report_comment(Comment) := 
+	writeln("*** `report_comment' has been renamed to report(comment( ))"),
+	report(comment(Comment)).
+%------------------------------------------------------------------------------
+report_init := 
+	writeln("*** `report_init' has been renamed to report(init)"),
+	report(init).
+%------------------------------------------------------------------------------
+op(900,fx,report_init).
+report_init(File) := 
+	writeln("*** `report_init' has been renamed to report(init( ))"),
+	report(init(File)).
+%------------------------------------------------------------------------------
+op(900,fx,show_macro).
+show_macro(Macro) := 
+	writeln("*** `show_macro' has been renamed to show(macro( ))"),
+	show(macro(Macro)).
+%------------------------------------------------------------------------------
+list_options := 
+	writeln("*** `list_options' has been renamed to list(options)"),
+	list(options).
+%------------------------------------------------------------------------------
+version := 
+	writeln("*** `version' has been renamed to show(version)"),
+	show(version).
+
+%------------------------------------------------------------------------------
+% `eval' has been renamed to `call'.
+%
+op(900,fx,eval).
+eval(Goal) := 
+	writeln("*** `eval' has been renamed to `call'"),
+	call(Goal).
+
+%------------------------------------------------------------------------------
+% `compile' has been eleiminated since it makes no sense for provers like
+% otter. 
+%
+op(900,fx,compile).
+compile(File) :=
+	writeln("*** `compile' works for ProCom only."),
+	'ProCom:do' = compile,
+	prove(File),
+	'ProCom:do' = prove.
+
+%------------------------------------------------------------------------------
+% `run' has been eleiminated since it makes no sense for provers like otter. 
+%
+op(900,fx,run).
+run(File) :=
+	writeln("*** `run' works for ProCom only."),
+	'ProCom:do' = run,
+	prove(File),
+	'ProCom:do' = prove.

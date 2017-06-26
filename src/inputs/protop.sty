@@ -1,0 +1,259 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% $Id: protop.sty,v 1.1 1995/05/01 19:47:03 gerd Exp $
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1994 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%****************************************************************************
+
+%% Allocate some counters to be used in this style file
+
+\newcount\PR@cnt@i
+\newcount\PR@cnt@ii
+
+%%%----------------------------------------------------------------------------
+%%% Title Page
+%%%
+
+\def\Title#1{\title{{\bf #1}}}
+\let\@author=\relax
+\let\Author=\author
+\def\Date#1{\date{\footnotesize #1}}
+\let\MakeTitle=\maketitle
+
+%%%----------------------------------------------------------------------------
+%%% Single Description
+%%%
+
+\newenvironment{Experiment}[1]{\newpage\section{#1}}{}
+
+%%%----------------------------------------------------------------------------
+%%% Explanation
+%%%
+
+\newenvironment{Text}{\subsection{Explanation}}{\par}
+
+%%%----------------------------------------------------------------------------
+%%% Matrix
+%%%
+\def\PRHeadClauses{\subsection{Clauses}}
+
+\newenvironment{Clauses}{%
+  \begingroup%
+  \raggedright%
+  \PRHeadClauses%
+  \catcode`\_=\active%
+  \let\Clause=\PR@Clause@A%
+  \begin{list}{}{\itemsep=0pt}%
+}{\end{list}%
+  \endgroup%
+}
+
+\def\PR@Clause@A#1{\item[#1]\@ifnextchar[{\PR@Clause@B}{}}
+\def\PR@Clause@B[#1]{\mbox{\(#1\)}\@ifnextchar[{ \(\vee\) \PR@Clause@B}{}}
+
+%%%----------------------------------------------------------------------------
+%%% Options
+%%%
+
+\def\PRHeadOptions{\subsection{Options}\footnotesize}
+
+\newenvironment{Options}{%
+  \begingroup%
+  \PRHeadOptions%
+  \catcode`\_=\active%
+  \let\Option=\PR@Option%
+  \let\DefaultOption=\PR@DefaultOption%
+  \parskip=0pt%
+  \parindent=0pt%
+  \begin{tabular}{lcl}
+}{\end{tabular}%
+  \endgroup%
+}
+
+\def\PR@Option#1#2{#1 &=& \parbox[t]{.65\textwidth}{\raggedright #2 }\\ }
+\def\PR@DefaultOption#1#2{}
+
+%%%----------------------------------------------------------------------------
+%%% 
+%%%
+
+\def\Timeout{---}
+\def\NoTime{}
+\def\PRHeadTimeTable{\subsection{Times}\normalsize}
+
+\newenvironment{TimeTable}{%
+  \begingroup%
+  \catcode`\_=\active%
+  \PRHeadTimeTable%
+  \let\Time=\PR@Time%
+  \begin{center}%
+  \begin{tabular}{|l|r|}%
+  \hline%
+  \multicolumn{2}{|c|}{{\bf Times in ms}}\\\hline\hline%
+}{\hline\end{tabular}\end{center}\endgroup\par}
+
+\def\PR@Time#1#2{#1&#2\\}
+
+%%%----------------------------------------------------------------------------
+%%% 
+%%%
+\def\PRHeadProof{\subsection{Proof}}
+
+\def\ProofTreeLabelFont{\footnotesize\sf}
+\def\ProofTreeLabelRadius{20}
+\def\ProofTreeUnitLenght{.1mm}
+
+\newenvironment{ProofTree}[2]{\PRHeadProof\begingroup%
+	\unitlength=\ProofTreeUnitLenght%
+	\PR@cnt@i=-#2\advance\PR@cnt@i 10
+	\PR@cnt@ii=#2\advance\PR@cnt@ii-5
+	\count255=#1\multiply\count255 2
+	\let\Node=\PR@ProofTree@Node%
+	\let\Next=\PR@ProofTree@Next%
+	\begin{center}
+	\begin{picture}(\count255,\PR@cnt@i)(-#1,\PR@cnt@ii)
+}{%
+	\end{picture}%
+	\end{center}
+	\endgroup
+}
+
+\def\PR@ProofTree@Node#1#2#3{%
+	\PR@cnt@i=\ProofTreeLabelRadius\multiply\PR@cnt@i2%
+	\put(#2,#3){\circle{\PR@cnt@i}}%
+	\put(#2,#3){\makebox(0,0){\ProofTreeLabelFont	#1}}}%
+\def\PR@ProofTree@Next#1#2#3#4{%
+	\PR@cnt@i=#2\advance\PR@cnt@i-\ProofTreeLabelRadius%
+	\PR@cnt@ii=#4\advance\PR@cnt@ii\ProofTreeLabelRadius%
+	\drawline(#1,\PR@cnt@i)(#3,\PR@cnt@ii)}%
+
+
+%%%----------------------------------------------------------------------------
+%%% 
+%%%
+\def\PRHeadProofInfo{\subsection{Proof Nodes}}
+
+\newenvironment{Info}[1]{\item[{\bf Node #1:}]
+}{%
+}
+
+\newenvironment{ProofInfo}{\PRHeadProofInfo\begingroup%
+	\par%
+	\tiny%
+	\catcode`\_=\active%
+	\let\NL=\par
+	\def\NEG{\(\neg \)}
+	\begin{list}{\parsep=0pt\itemsep=0pt\leftmargin=2em}{}
+}{%
+	\end{list}%
+	\endgroup
+}
+
+%%%----------------------------------------------------------------------------
+%%% Table Macros 
+%%%
+\def\PRHeadSummary{\newpage\footnotesize}
+\def\PRSummaryHeadFont{\Large\bf}
+\def\PRSummarySubHeadFont{\large}
+\def\PRSummaryTitleFont{\small}
+
+\newif\ifPR@head@line
+
+\newenvironment{Summary}[1]{%
+  \begingroup%
+  \PRHeadSummary%
+  \def\PR@summary@width{#1}%
+  \let\Separator=\hline%
+  \let\Row=\PR@SummaryRow%
+  \let\Head=\PR@SummaryHead%
+  \let\SubHead=\PR@SummarySubHead%
+  \let\Titles=\PR@SummaryTitle%
+  \let\Section=\PR@SummarySection%
+  \let\Time=\PR@SummaryTime%
+  \let\Label=\PR@SummaryLabel%
+  \PR@head@linefalse%
+                                %	\catcode`\_=\active%
+  \begin{center}%
+%    \begin{tabular}{#2}\hline%
+}{%
+%    \end{tabular}%
+  \end{center}%
+  \endgroup%
+}
+
+\def\PR@SummaryHead#1{%
+  \multicolumn{\PR@summary@width}{|c|}{\PRSummaryHeadFont%
+    \rule[-1ex]{0pt}{3.5ex}#1}%
+  \global\PR@head@linetrue%
+  \\\hline}
+\def\PR@SummarySubHead#1{%
+  \multicolumn{\PR@summary@width}{|c|}{\PRSummarySubHeadFont%
+    \rule[-1ex]{0pt}{3.5ex}#1}%
+  \global\PR@head@linetrue%
+  \\\hline}
+
+
+
+\def\PR@SummaryRow{%
+  \PR@cnt@i=\PR@summary@width%
+  \ifnum\PR@cnt@i>0\let\PR@NEXT=\PR@SummaryRow@B%
+  \else%
+  \let\PR@NEXT=\relax
+  \fi%
+  \PR@NEXT
+  }
+\def\PR@SummaryRow@B#1{#1 \PR@SummaryRow@C}
+\def\PR@SummaryRow@C#1{&* #1
+  \advance\PR@cnt@i-1%
+  \ifnum\PR@cnt@i>0\let\PR@NEXT=\PR@SummaryRow@C%
+  \else\\\hline%
+  \let\PR@NEXT=\relax%
+  \fi%
+  \PR@NEXT}
+
+\def\PR@SummaryTitle{%
+  \PR@cnt@i=\PR@summary@width%
+  \ifnum\PR@cnt@i>0\let\PR@NEXT=\PR@SummaryTitle@A%
+  \else%
+  \let\PR@NEXT=\relax%
+  \fi%
+  \PR@NEXT}
+\def\PR@SummaryTitle@A{%
+  \@ifnextchar[{\PR@SummaryTitle@B}{\PR@SummaryTitle@B[1]}}
+\def\PR@SummaryTitle@B[#1]#2{%
+  \multicolumn{#1}{|c|}{#2}%
+  \advance\PR@cnt@i-#1%
+  \ifnum\PR@cnt@i>0\let\PR@NEXT=\PR@SummaryTitle@C%
+  \else\\\hline
+  \let\PR@NEXT=\relax%
+  \fi%
+  \PR@NEXT}
+\def\PR@SummaryTitle@C{%
+  \@ifnextchar[{\PR@SummaryTitle@D}{\PR@SummaryTitle@D[1]}}
+\def\PR@SummaryTitle@D[#1]#2{%
+  &\multicolumn{#1}{|c|}{#2}%
+  \advance\PR@cnt@i-#1%
+  \ifnum\PR@cnt@i>0\let\PR@NEXT=\PR@SummaryTitle@C\else\\\hline
+  \let\PR@NEXT=\relax%
+  \fi%
+  \PR@NEXT}
+
+
+\def\PR@SummaryLabel#1{#1}
+\def\PR@SummaryTime#1{#1}
+\def\PR@SummarySection#1{#1}
+
+%%%----------------------------------------------------------------------------
+%%% Finally we load eepic to provide the drawing primitives
+%%%
+
+\input epic.sty
+\input eepic.sty
+

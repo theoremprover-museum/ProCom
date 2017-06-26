@@ -1,0 +1,20 @@
+
+aha(_).
+
+head(X,Y) :- aha(X) /: s(Y),q(X,Y),p(X),r(_).
+
+?- head(12,32).
+
+#begin(constraint_theory).
+
+p(X) :- X is 45.
+p(X) :- p(f(X)),q(X).
+
+q(f(345)).
+
+q(_,_).
+
+s(never).
+r(never).
+
+#end(constraint_theory).

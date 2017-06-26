@@ -1,0 +1,219 @@
+%%%****************************************************************************
+%%% $Id: use-capri.tex,v 1.1 1994/12/02 08:58:35 gerd Exp $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1994 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%****************************************************************************
+\def\RCSrevision{\RCSstrip$Revision: 1.1 $}
+\def\RCSdate{\RCSstrip$Date: 1994/12/02 08:58:35 $}
+
+\documentstyle [11pt,%.......... 
+		fleqn,%......... smash mathematics leftward
+		floatfig,%...... 
+		psfig,%......... 
+		verbatim,%...... use input of files
+		pcode,%......... obviously Prolog code
+		gntitle,%....... 
+		old-fonts,%..... 
+		makeidx,%....... yes, we are making an index
+		named,%......... 
+		rcs,%........... 
+		psulhead,%...... use underlined heading
+		idtt,%.......... use | | for verbatim
+		epic%...........
+		]{book}%..... 
+\pagestyle{ulheadings}
+
+\setlength{\textwidth}{160mm}    \setlength{\textheight}{230mm}
+\setlength{\parindent}{0Em}      \setlength{\parskip}{1ex}
+\setlength{\topmargin}{0mm}
+\setlength{\headheight}{6mm}
+\setlength{\headsep}{8mm} 
+\setlength{\footskip}{8mm} 
+\setlength{\evensidemargin}{0mm} \setlength{\oddsidemargin}{0mm}
+
+
+\author{Gerd Neugebauer}
+\title{\ProCom/CaPrI \\\rlap{Calculi Programming Interface}}
+\subtitle{User's Guide}
+\version{\Version}
+\edition{\RCSrevision}
+\date{\today}
+\address{IMN, HTWK Leipzig
+\\	 Postfach 66
+\\	 04251 Leipzig (Germany)
+\\	 Net: gerd@imn.th-leipzig.de
+}
+\input{doc.cfg}
+
+\newenvironment{Sample}{%
+	\begin{center}
+	  \begin{minipage}{.5\textwidth}
+	    \rule{\textwidth}{.1pt}\vspace{-1ex}%
+	    }{%
+	    \vspace{-2ex}\rule{\textwidth}{.1pt}
+	  \end{minipage}
+	\end{center}%
+	}
+
+\newcommand\ProTop{ProTop}
+\newcommand\ProCom{ProCom}
+\newcommand\eclipse{ECL$^i$PS$^e$}
+
+\let\PrologFILE=\relax
+\let\PredicateFileExtension=\relax
+
+\makeindex
+\begin{document} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\initfloatingfigs
+
+\maketitle
+\null\vfill
+Copyright {\copyright} 1994 Gerd Neugebauer
+\medskip
+
+Permission is granted to make and distribute verbatim copies of this manual
+provided the copyright notice and this permission notice are preserved on all
+copies.
+
+\newpage %---------------------------------------------------------------------
+\tableofcontents
+\newpage %---------------------------------------------------------------------
+
+\chapter{Using \ProCom}
+
+%------------------------------------------------------------------------------
+\section{Introduction}
+
+\begin{floatingfigure}{.4\textwidth}
+  \begin{center}
+    \mbox{\psfig{file=overview.eps}}
+    \caption{Overview}\label{overview}
+  \end{center}
+\end{floatingfigure}
+
+\ProCom{} is a family of theorem provers which can be used out of the box as
+well as a test bed for developing own theorem provers. The techniques uses in
+\ProCom{} are close to PTTP-like theorem provers \cite{stickel:prolog}. We
+will not assume any knowledge on these techniques but it might help
+understanding some of the details.
+
+Implementing this paradigm means to translate a given problem into a Prolog
+program which behaves like a theorem prover. A overview of this idea can be
+seen in figure~\ref{overview}.
+
+The first phase of a proof attempt takes a problem --- typically in the
+language of first order logic --- and translates it into Prolog clauses. This
+task is performed by the \ProCom{} system. The result is a Prolog program.
+This Prolog program may contain specific constructs of the target Prolog
+dialect.\footnote{Currently only \eclipse\ and Quintus Prolog are supported.}
+
+Even so it is not necessary we will sketch the way \ProCom{} works.  After the
+problem has been read and stored in matrix form, a preprocessor is applied
+which performs several reductions. The reduced matrix is translated into
+Prolog code in four phases. One phase takes the clauses of the matrix,
+clusters them in procedures and generates code for those procedures. A second
+phase translates the set of goals. Goals deserve a special treatment which is
+different from usual procedurs. A third phase is adds Prolog code from a
+library. The final phase consists of an optimizer which tries to remove
+redundencies from the generated Prolog code.
+
+\newpage
+Having in mind this scheme simply using \ProCom{} goes as follows. First, a
+problem is specified. This means it is written into a file in an extended
+Prolog notation. Another file containing various options to controll the
+behaviour of \ProCom{} may be used. Those input files are given to \ProCom.
+The result is a stand-alone Prolog program. This Prolog program can be
+executed. 
+
+As a minimal result the answer {\tt yes} or {\tt no} is given (if any).
+Additional the presentation of a answer substitution or even a complete proof
+tree can be achieved.
+
+%------------------------------------------------------------------------------
+\input{interface}
+\input{syntax}
+\input{options}
+
+\input{capri}
+
+\chapter{Administration of \ProCom}
+
+%------------------------------------------------------------------------------
+\section{Creating a Stand-Alone Executable}
+
+
+
+\subsection{Installing \ProCom}\label{sec:installation}
+
+The \ProCom{} distribution comes in a single tar file {\sf procom-{\em
+VV}.tar.Z} where {\em VV} stands for a version number. First, you have to
+choose a place where to install \ProCom. Change the current directory to this
+directory and execute the shell command
+
+|  uncompress < |{\sf {\em SomeDir/}procom-{\em VV}.tar.Z} {\tt\char"7C} | tar -xvf -|
+
+where {\em SomeDir}\/ is the directory where the distribution file is located.
+This command generates a directory named {\sf ProCom} which contains the
+distribution files.
+
+
+Run the shell command 
+
+|  make config|
+
+to generate the configuration file. This command will try to guess the place
+where \ProCom{} has been installed. Unfortunately sometimes this may fail and
+may produce wrong pathnames in {\sf config.pl}. Thus you should check this file
+and change the value of |HERE| in {\sf Makefile} appropriately.
+
+Finally run the shell command
+
+|  make procom|
+
+This will generate an \eclipse{} saved state named {\sf procom}. This file is
+executable and should be placed on your search path. Obviously this step
+requires \eclipse{} to be installed and accessible under the name |xeclipse|.
+
+The saved state |procom| will try to automatically start an appropriate
+interface. If it is desirable to use the Prolog interface you can make a saved
+state |procom.st| which just contains the preloaded Prolog files without
+starting anything automatically. This is done with the command
+
+|  make procom.st|
+
+
+
+\subsection{Recompiling \ProCom}\label{sec:recompile}
+
+When you are recompiling \ProCom{} you have to consider some points.
+
+\begin{itemize}
+  \item Change the current directory to the installed \ProCom.
+	We assume that \ProCom{} is properly installed.
+  \item Edit the file {\sf ProCom/procom\_config.pl}\/ to reflect the provers
+	which are loaded into the final executable
+  \item Make sure that the libraries are located by absolute path names only.
+	This is strongly recommended to allow any user from any directory to
+	use \ProCom{} without problems.
+  \item Run the shell command
+
+	|  make PROCOM=|{\em name}
+
+	where {\em name}\/ is the name of the final executable. When this
+	command is finished without errors the executable {\em name}\/ can be
+	tested.
+\end{itemize}
+
+
+\bibliographystyle{named}
+\bibliography{gn-atp}
+
+\end{document} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

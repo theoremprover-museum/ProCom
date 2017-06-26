@@ -1,0 +1,34 @@
+%%%****************************************************************************
+%%%* $Id: simple.pt,v 1.1 1995/01/11 09:15:45 gerd Exp $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%============================================================================
+%%
+%%
+%%
+
+writeln(start).
+
+x(V) := write(V),write(V),nl.
+
+repeat 5 times write('.'),write(',').
+
+for X in [1,2,3] do 
+	write(X),
+	(for Y in [a,b,c] do
+		 write(Y)),
+	nl.
+
+for File in files(".","*.pl") do writeln(File).
+
+x(end).
+
+writeln(stop).

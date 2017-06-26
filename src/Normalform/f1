@@ -1,0 +1,6 @@
+
+
+p(0),
+forall X : (p(X) => p(f(X)))
+=> forall X : (nat(X) => p(X)).
+

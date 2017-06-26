@@ -1,0 +1,44 @@
+
+     /-------                           __
+     |||     \\                       //  \
+     |||      ||                    ///    \
+     |||      ||                   ///      \
+     |||      ||                  |||
+     |||_____//  /----      _     |||             _
+     |||         ||  \\   // \\   |||           // \\   /\    /\
+     |||         ||  //  ||   ||  |||          ||   ||  ||\  /||
+     |||         ||---   ||   ||  |||          ||   ||  || \/ ||
+     |||         ||\\    ||   ||   \\\      /  ||   ||  ||    ||
+     |||         || \\   ||   ||    \\\    /   ||   ||  ||    ||
+     \|/         \/  \\   \\_//       \\__/     \\_//   \/    \/  gene95
+
+
+
+The ProCom distribution  comes in a single tar  file procom-VV.tar.gz  where VV
+stands for a version number. First, you have to choose a place where to install
+ProCom. Change the  current directory to this directory  and execute the  shell
+command
+
+	gunzip < SomeDir/procom-VV.tar.gz | tar -xvf -
+
+where SomeDir is the directory  where the distribution  file is located.   This
+command generates a  directory   named ProCom which contains   the distribution
+files.
+
+
+Run the shell command 
+
+	make install INSTALLDIR=your_installation_directory
+
+to install ProTop in the directory ``your_installation_directory''. If you want
+to install it in place use INSTALLDIR=.
+
+make   will try  to    guess  the place    where   ProCom has  been  installed.
+Unfortunately sometimes this may fail and may produce wrong pathnames. Thus you
+should check the Makefile and change the value of HERE appropriately.
+
+ECLiPSe saved states  named protop and protop.st will  be generated. The  file
+protop is executable and should be placed on your  search path. Obviously this
+step requires ECLiPSe to be installed.
+
+Consult the user documentation Doc/manual.tex for further details.

@@ -1,0 +1,1121 @@
+%%%****************************************************************************
+%%% $Id: protop.tex,v 1.10 1995/07/03 11:35:12 gerd Exp gerd $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%****************************************************************************
+
+\chapter{Using \ProTop}
+
+%------------------------------------------------------------------------------
+\section{Introduction}
+
+\ProTop{} is a shell which allows to perform all tasks necessary to run a
+theorem prover. To accomplish this a set of instructions is provided to
+control the actions of the prover top-level shell \ProTop. This chapter
+describes the various possibilities provided by \ProTop.
+
+
+\section{Interactive Use}
+
+Two major uses of \ProTop{} can be envisioned: The interactive use and the use
+as script language. First we describe  the interactive use. To start \ProTop{}
+you just have to execute  the command |protop| from the  shell. For this might
+be necessary  to make the location of  the executable  explicit or enlarge the
+search path appropriately.
+
+After \ProTop{} is started a welcome message is printed and a prompt appears.
+The prompt is usually the string |ProTop ->|. Now you can type in commands.
+Those commands are read by an interpreter and executed immediately.
+
+Note that the reading apparatus of Prolog is used to parse the input. Thus it
+is necessary to terminate any input with a full stop.
+
+Consider the following (rather short) sample session:
+
+\begin{BoxedSample}
+\$ |protop|
+\
+
+\                --- Welcome to ProTop (\Version) ---
+
+ProTop -> |stop.|
+
+bye
+\$ 
+\end{BoxedSample}
+
+The output of the computer is presented in a {\itt slanted teletype font}. The
+input of a user is presented in an {\tt upright teletype font}.
+
+As we see \ProTop{}   is started from the  shell.  At the prompt the   command
+|stop| is  typed in. This terminates  the  session immediately and  control is
+returned to the shell. Further commands and options to control the behavior of
+\ProTop{} are described on the next few pages.
+
+The most important  instructions are those which  leave \ProTop.   Most of the
+possibilities one may think of are included. Thus it should  be fairly easy to
+leave \ProTop.
+
+\begin{description}
+  \item [end]\index{ProTop!end}\ \\
+  This instruction ends the session if executed at the top level.
+  \item [stop]\index{ProTop!stop}\ \\
+  This instruction ends the session if executed at the top level.
+  \item [exit]\index{ProTop!exit}\ \\
+  This instruction ends the session if executed at the top level.
+  \item [halt]\index{ProTop!halt}\ \\
+  This instruction ends the session when executed in an arbitrary context.
+\end{description}
+
+\section{Options Controlling \ProTop}
+
+\begin{description}
+  \item [ProTop:welcome] |= on|
+    \\
+    This option controls whether the startup message should be printed.
+  \item [ProTop:debug] | = off|
+    \\
+    This option allows us to get more detailed information on the actions
+    performed by \ProTop. This is especially useful when debugging script
+    files.
+  \item [ProTop:verbose] | = on|
+    \\
+    This option can be used to control the verbosity of the response given by
+    \ProCom.
+  \item [ProTop:resource\_file] | = ".protop"|
+    \\
+    This option specifies a file to be loaded when \ProTop{} is started.
+    Usually it is only useful to redefine this option if \ProTop{} is started
+    from within Prolog (see section \ref{ProTop:prolog.interface})
+  \item [ProTop:path] | = [".","Scripts","~"]|
+    \\
+    This option specifies the search path where \ProTop\ scripts are searched
+    for. It is strongly recommended to include the current directory in this
+    list.
+  \item [ProTop:script\_extension] | = ["",".pt"]|
+    \\
+    This option is used to specify the extensions which should be tried when
+    searching for \ProTop{} script files.
+  \item [ProTop:prover\_file] | = "...prover.pl"|
+    \\
+    This option specifies the intermediate file name of the prover.
+  \item [ProTop:backup] | = on|\label{ProTop:backup}
+    \\
+    This option controls the action performed when discovering an old report
+    file. If this option is turned on then the old report file is moved aside
+    by appending some (negative) version number to it. Otherwise the old
+    report file is overwritten.
+\end{description}
+
+\section{Getting Information About \ProTop}
+
+\begin{description}
+  \item [help]\index{ProTop!help}\ 
+    \\
+    This instruction prints a short information which should help you to carry
+    on. The help command can also be given an argument. In this case some
+    information on the argument is given. This is the same as executing the
+    |status| command with an argument. For details see the description of
+    |status|.
+  %
+\begin{BoxedSample}
+  ProTop -> |help.|
+  The command `show' can be used to get information on the
+  system as a whole or on parts of it.
+    show.
+  presents the status of some important parts of ProTop.
+
+    show commands.
+  gives a list of all commands available.
+
+  To leave ProTop type
+    halt.
+  ok.
+  ProTop ->
+\end{BoxedSample}
+
+  \item [status]\index{ProTop!status}\ 
+    \\
+    This instruction prints the status of various parts of \ProTop{} to the
+    scrren. The status of parts can be displayed seperately by the next
+    instruction.
+  %
+\begin{BoxedSample}\def\Prover#1{          #1\par}\let\Filter\Prover
+  ProTop -> |status.|
+    This is ProTop version \Version
+    Filters:
+\ProTopFilters
+          none
+    Provers:
+\ProTopProvers
+    Matrix:
+          No matrix loaded.
+    Macros:
+          0 macros are defined.
+  ok.
+\end{BoxedSample}
+
+  \item [status({\em Part})]\index{ProTop!status}\ 
+    \\
+    This instruction displays the status of the requested part {\em Part} to
+    the screen. {\em Part}\/ can also be a list of parts in which case the
+    status of all parts given in the list is displayed. The following parts
+    can be specified:
+    \begin{description}
+    \item [version]\ \\ prints the version of \ProTop.
+    \item [macros]\ \\  prints a summary of macros defined in \ProTop.
+    \item [prover]\ \\  prints a list of provers loaded.
+    \item [filter]\ \\  prints a list of filters loaded.
+    \item [matrix]\ \\  prints a summary of the matrix currently loaded.
+    \item [clauses]\ \\ prints a list of clauses currently stored in the
+      matrix.
+    \item [contrapositives]\ \\ prints a list of contrapositives currently
+      stored in the matrix.
+    \item [modules]\ \\ prints a list of the loaded modules and the associated
+      documentation strings.
+    \item [module({\em Module}\/)]\ \\ prints documentation string for module
+      {\em Module}. It fails if {\em Module}\/ is not instanciated properly or
+      it contains no \ProTop{} module.
+    \item [options]\ \\ prints a list of all options.
+    \item [option({\em Option}\/)]\ \\ prints the value of the option {\em
+        Option}. 
+    \item [file({\em File}\/)]\ \\ displays the contents of the file {\em
+        File} on the screen.
+    \item [macros]\ \\ prints the list of all macros to the screen.
+    \item [macro({\em Macro}\/)]\ \\ displays the definition of all macros for
+      which the head unify with {\em Macro}.
+    \item [all]\ \\     does {\bf version}, {\bf filter}, {\bf prover}, {\bf
+        matrix} and {\bf macros}.
+    \end{description}
+
+    This instruction fails if one of the requested parts is not known or it is
+    called with a variable argument.
+
+  \item [info]\index{ProTop!info}\ 
+    \\
+    This is a variant of |status|. For details see above.
+
+  \item [list]\index{ProTop!list}\ 
+    \\
+    This is a variant of |status|. For details see above.
+
+  \item [show]\index{ProTop!show}\ 
+    \\
+    This is a variant of |status|. For details see above.
+
+\end{description}
+
+
+\section{Script Files}
+
+Script files provide a means to keep a sequence of instructions beyond the end
+of a single session.
+
+One place where a script file is involved is at the startup of \ProTop. At
+this occasion the file {\sf .protop} is sought in the current directory and in
+the home directory of the user and instructions from this file are executed if
+it is found. The primary intension is to allow the user to specify some
+options to adapt the behavior of \ProTop. Nevertheless arbitrary instructions
+can be placed there to be executed at startup time.
+
+The following commands are related to script files
+
+\begin{description}
+  \item [include({\em File})]\index{ProTop!include}\ 
+    \\
+    This instruction reads commands from the file {\em File} and executes
+    them.  The option |ProTop:path| can be used to specify the search path.
+    The option |ProTop:script\_ext| can be used to specify the extensions to
+    be appended when searching for the actual file.
+  %
+\begin{BoxedSample}
+  ProTop -> |include("some_script").|
+  |---| ProTop script file some\_script not found.
+  no.
+  ProTop -> |include(".protop").|
+  ok.
+  ProTop -> 
+\end{BoxedSample}
+
+  \item ["{\em File}"]\index{ProTop!include}\ 
+    \\
+    A file name marked as a string --- i.e. enclosed in double quotes --- Is
+    taken as a file name to be included. Thus it is equivalent to
+    {\bf include({\em File}\/)}.
+
+  \item [end\_of\_file]\index{ProTop!end\_of\_file}\ \\
+  This token is returned by the Prolog reading apparatus upon end of file.
+  Thus it can be used in this sense. Upon end of file the session is usually
+  ended. If encountered in a script file the rest of the file is ignored.
+\end{description}
+
+\section{Output and Input}
+
+For convenience some commands of the underlying Prolog are made available as
+\ProTop{} instructions. They can be used to write interactive script files.
+
+\begin{description}
+  \item [nl]\index{ProTop!nl}\ \\
+  This instruction writes a newline to the screen.
+  \item [write({\em Term})]\index{ProTop!write}\ \\
+  This instruction writes {\em Term}\/ to the screen. {\em Term} is {\sc not}
+  followed by a newline.
+  %
+\begin{BoxedSample}
+  ProTop -> |write("hello world.").|
+  hello world.ok.
+  ProTop -> 
+\end{BoxedSample}
+
+  \item [writeln({\em Term})]\index{ProTop!writeln}\ \\
+  This instruction writes {\em Term}\/ to the screen. {\em Term} is followed
+  by a newline.
+  %
+\begin{BoxedSample}
+  ProTop -> |writeln("hello world.").|
+  hello world.
+  ok. 
+\end{BoxedSample}
+
+  \item [printf({\em Format}, {\em Arguments})]\index{ProTop!printf}\ \\
+  This instructions prints the {\em Arguments} according to the format string
+  {\em Format}. {\em Format} is a string where \% is used as escape to specify
+  the form of an argument. {\em Arguments} is a list of terms to be printed
+  according to the format string. For details see the documentation of the
+  \eclipse{} predicate |printf/2|.
+  %
+\begin{BoxedSample}
+  ProTop -> |printf(".....%w.....%w.....\n",[1,2]).|
+  .....1.....2.....
+  ok.
+\end{BoxedSample}
+
+  \item [read\_string({\em String})]\index{ProTop!read\_string}\ \\
+  This reads all characters up to the next newline into the string {\em
+  String}. The end of file also terminates the reading.
+  %
+\begin{BoxedSample}
+  ProTop -> |read_string(String), writeln(String).|
+   |some string terminated by newline|
+  some string terminated by newline
+  ok.
+\end{BoxedSample}
+
+  \item [read\_string({\em Prompt}, {\em String})]\index{ProTop!read\_string}\
+  \\
+  This instruction writes {\em Prompt} to the screen and reads all characters
+  up to the next newline into the string {\em String}. The end of file also
+  terminates the reading.
+  %
+\begin{BoxedSample}
+  ProTop -> |read_string("Enter a string:",String).|
+  Enter a string: |some string terminated by newline|
+  ok.
+\end{BoxedSample}
+
+  \item [read({\em Term})]\index{ProTop!read}\ \\
+  This instruction reads a prolog term from the standard input and unifies it
+  with {\em Term}. If the unification fails then this command fails. The term
+  has to be terminated by a colon.
+  %
+\begin{BoxedSample}
+  ProTop -> |read(Term), writeln(Term).|
+   |some_term(Var,const).|
+  some\_term(Var, const)
+  ok.
+  ProTop -> |read(term), writeln(Term).|
+   |some_term(Var,const).|
+  no.
+\end{BoxedSample}
+
+  \item [read({\em Prompt}, {\em Term})]\index{ProTop!read}\ \\
+  This instruction writes {\em Prompt} to the screen and reads a prolog term
+  from the standard input and unifies it with {\em Term}. If the unification
+  fails then this command fails. The term has to be terminated by a colon.
+  %
+\begin{BoxedSample}
+  ProTop -> |read("Term: ",Term), writeln(Term).|
+  Term:  |some_term(Var,const).|
+  some\_term(Var, const)
+  ok.
+\end{BoxedSample}
+
+\end{description}
+
+\section{Flow of Control}
+
+\begin{description}
+  \item [{[]}]\index{ProTop![]}\ \\
+  An empty list of instructions simply succeeds.
+  %
+\begin{BoxedSample}
+  ProTop -> |[].|
+  ok.
+\end{BoxedSample}
+
+  \item [{[{\em Instruction}, \ldots, {\em Instruction}]}]\index{ProTop![...]}\ \\
+  A list of instructions is executed like a conjunction (see below).
+  %
+\begin{BoxedSample}
+  ProTop -> |[write(1),write(2),nl].|
+  12
+  ok.
+\end{BoxedSample}
+
+  \item [({\em Instruction}, \ldots, {\em Instruction})]\index{ProTop!(,)}\ \\
+  Conjunctions are executed from left to right until one instruction fails.
+  In this case the whole conjunction fails. If no instruction fails then
+  the conjunction succeeds.
+  %
+\begin{BoxedSample}
+  ProTop -> |write(1),write(2),nl.|
+  12
+  ok.
+\end{BoxedSample}
+
+  \item [({\em Instruction}; \ldots; {\em Instruction})]\index{ProTop!(;)}\ 
+    \\
+    Disjunctions are executed from left to right until one instruction
+    succeeds.  In this case the whole disjunction succeeds. If no instruction
+    succeeds then the disjunction fails.
+  %
+\begin{BoxedSample}
+  ProTop -> |(writeln(first),fail); writeln(second).|
+  first
+  second
+  ok.
+\end{BoxedSample}
+
+  \item [repeat {\em N}\/ times {\em Command}]\index{ProTop!repeat}\ 
+    \\
+    This instruction repeats the execution of {\em Command}\/ several times.
+    {\em N}\/ is an integer denoting the number of repetitions.
+  %
+\begin{BoxedSample}
+  ProTop -> |repeat 5 times write("----+").|
+  ----+----+----+----+----+ok.
+  ProTop ->       
+\end{BoxedSample}
+
+  \item [for {\em Var}\/ in {\em Spec}\/ do {\em Command}]\index{ProTop!for}\ 
+    \\
+    This instruction repeats {\em Command}\/ for all elements of {\em Spec}\/
+    assigned to {\em Var}. This is done in a failure driven manor, i.e.
+    variable bindings are undone after each loop. {\em Spec}\/ is expanded to
+    a list before the loop is performed. The following constructs for {\em
+      Spec}\/ are supported:
+  \begin{description}
+    \item [{[{\em ...}]}]\ \\
+    A list of any elements is the simplest form of a specification. No
+    expansion takes place in this case.
+    %
+    \begin{BoxedSample}
+ProTop -> |for Var in [1,2,3] do writeln(Var).|
+1
+2
+3
+ok.
+    \end{BoxedSample}
+
+    \item [files({\em Dir})]\ 
+      \\
+      This specification expands to a list of all files in the directory {\em
+        Dir}. Note that the files are not sorted.
+    %
+\begin{BoxedSample}
+  ProTop -> |for F in files(".") do writeln(F).|
+  ./COPYING
+  ./README
+  ./INSTALL
+  ./Makefile
+  ...
+  ok.
+\end{BoxedSample}
+
+    \item [files({\em Dir}, {\em Pattern})]\ 
+      \\
+      This specification expands to a list of all files in the directory {\em
+        Dir} which match the pattern {\em Pattern}. The syntax of pattern is
+      the syntax allowed for Bourne shell commands.
+    %
+\begin{BoxedSample}
+  ProTop -> |for F in files(".","*.pl") do writeln(F).|
+  ./main.pl
+  ./...prover.pl
+  ok.
+\end{BoxedSample}
+
+    \item [directories(Dir)]\ 
+      \\
+      This specification expands to a list of all directories in the directory
+      {\em Dir}.
+    %
+\begin{BoxedSample}
+  ProTop -> |for D in directories(".") do writeln(D).|
+  ./Doc
+  ./System
+  ./ProCom
+  ./Reductions
+  ./Capri
+  ./inputs
+  ...
+  ok.
+\end{BoxedSample}
+
+  \end{description}
+
+  \item [if {\em Condition}\/ then {\em Then}\/ else {\em
+      Else}]\index{ProTop!if}\ 
+    \\
+    This instruction evaluates the commands {\em Condition}. If this
+    evaluation succeeds then the commands {\em Then}\/ are evaluated
+    afterwards. Otherwise the commands {\em Else}\/ are executed.
+    %
+\begin{BoxedSample}
+  ProTop -> |if exists("/etc/motd")|
+            |then show(file("/etc/motd"))|
+            |else writeln("Sorry").|
+  SunOS Release 4.1.3 (GENERIC) \#3: Mon Jul 27 16:44:16 PDT 1992
+  ok. 
+\end{BoxedSample}
+
+  \item [if {\em Condition}\/ then {\em Then}]\index{ProTop!if}\ 
+    \\
+    This instruction evaluates the commands {\em Condition}. If this
+    evaluation succeeds then the commands {\em Then}\/ are evaluated
+    afterwards. Otherwise it succeeds without performing any other actions.
+    %
+\begin{BoxedSample}
+  ProTop -> |if not(exists("/etc/motd")) then|
+              |writeln("Sorry").|
+  ok.
+\end{BoxedSample}
+
+  \item [true]\index{ProTop!true}\ \\
+  This instruction always succeeds and does nothing else.
+  %
+\begin{BoxedSample}
+  ProTop -> |true.|
+  ok.
+\end{BoxedSample}
+
+  \item [fail]\index{ProTop!fail}\ \\
+  This instruction always fails and does nothing else.
+  %
+\begin{BoxedSample}
+  ProTop -> |fail.|
+  no.
+\end{BoxedSample}
+
+  \item [exists({\em File})]\index{ProTop!exists}\ \\
+  This instruction checks the existence of the file {\em File}. {\em File}
+  must be a symbol or string. Otherwise a type error is raised and the
+  instruction fails.
+  %
+\begin{BoxedSample}
+  ProTop -> |exists("~/.login").|
+  ok.
+  ProTop -> |exists("~/.protop").|
+  no.
+\end{BoxedSample}
+
+  \item [not({\em Condition}\/)]\index{ProTop!not}\ 
+    \\
+    This instruction executes {\em Condition}\/ and reverses the return
+    status.  I.e. it succeeds if {\em Condition}\/ fails and vice versa.
+  %
+\begin{BoxedSample}
+  ProTop -> |not(true).|
+  no.
+  ProTop -> |not(fail).|
+  ok.
+\end{BoxedSample}
+
+  \item [find\_file({\em File},{\em Path},{\em Extensions},{\em
+      FullFile})]\index{ProTop!find\_file}\ 
+    \\
+    This instruction tries to find the existing file {\em File} in a list of
+    directories {\em Path}. A list of extensions {\em Extensions}\/ is used to
+    augment the file name with an additional extension. The result is unified
+    with {\em FullFile}.
+  %
+\begin{BoxedSample}
+  ProTop -> |find_file(".PROTOP",[".","~"],[""],File),|
+            |writeln(File).|
+  no.
+  ProTop -> |find_file(".protop",[".","~"],[""],File),|
+            |writeln(File).|
+  ./.protop
+  ok.
+\end{BoxedSample}
+  
+  \end{description}
+
+\section{Macros}
+
+Macros are a means to ease live. Tasks which have to be performed repeatedly
+can be defined as a macro and executed when necessary. The simplest case is
+a macro as abbreviation for some other instructions as in the following
+example:
+\begin{BoxedSample}
+  ProTop -> |my_macro := write("hello "),|
+  |            write("world"), write("."), nl.|
+  ok.
+  ProTop -> |my_macro.|
+  hello world.
+  ok.
+\end{BoxedSample}
+Ok, it's rather simple. This macro simply writes |hello world.| followed by a
+newline --- an effect one can achieve simpler. The execution is triggered by a
+call with its name.
+
+Macros may also have arguments. Prolog variables are used to denote variable
+parts of the arguments. Let us again consider out previous example and make it
+a little bit more complicated:
+\begin{BoxedSample}
+  ProTop -> |my_macro(Arg) :=|
+  |           write("hello "), write(Arg), write("."), nl.|
+  ok.
+  ProTop ->
+\end{BoxedSample}
+
+Note that this macro can coexist with the previous one since the number of
+actual parameters distinguishes them. If we call this macro with the command
+|my_macro("world").| we get the same as before. But now we can also specify
+another argument, as in
+\begin{BoxedSample}
+  ProTop -> |my_macro("world").|
+  hello world.
+  ok.
+  ProTop -> |my_macro("friends").|
+  hello friends.
+  ok.
+\end{BoxedSample}
+
+The coexistence of macros goes further. The selection of an appropriate macro
+is done via unification of its head. We exploit this fact by further
+developing our example:
+\begin{BoxedSample}
+  ProTop -> |my_macro(all,999) := my_macro("world").|
+  ok.
+  ProTop -> |my_macro(some,12) := my_macro("friends").|
+  ok.
+\end{BoxedSample}
+
+These two instructions establish {\em two} definitions of |my_macro/2|. Now we
+can test them and see how they work:
+
+\begin{BoxedSample}
+  ProTop -> |my_macro(all,X).|
+  hello world.
+  ok.
+  ProTop -> |my_macro(some,X).|
+  hello friends.
+  ok.
+  ProTop -> |my_macro(A,B), writeln('A'=A), writeln('B'=B).|
+  hello world.
+  A = all
+  B = 999
+  ok.
+\end{BoxedSample}
+
+To conclude we summarize all macro related commands we have already seen and
+some others, not mentioned yet.
+
+\begin{description}
+  \item [{\em Macro} := {\em Code}]\index{ProTop!:=}\ \\
+  This instruction stores {\em Code} as replacement text for {\em Macro}.
+  Several clauses for the same macro can be specified.
+
+  \item [delete macro({\em Macro})]\index{ProTop!delete macro}\ \\
+  This instruction deletes all macros that unify with {\em Macro}. As a
+  consequence we can delete all macros with the command
+  %
+\begin{BoxedSample}
+  ProTop -> |delete macro(_).|
+  ok.
+\end{BoxedSample}
+
+  Note that the underscore |_| is the anonymous variable like in Prolog.
+  A more natural use would be the following one:
+  %
+\begin{BoxedSample}
+  ProTop -> |delete macro(my_private_macro(_,_)).|
+  ok.
+\end{BoxedSample}
+
+  This example deletes all entries for the macro |my_private_macro| with two
+  arguments.
+
+  \item [show macro({\em Macro})]\index{ProTop!show macro}\ \\
+  This instruction lists all macros which unify with {\em Macro}. If none is
+  found then an informative message is displayed.
+  %
+\begin{BoxedSample}
+  ProTop -> |show macro(my_macro).|
+  my\_macro := write(hello ), write(world), write(.), nl
+  ok.
+  ProTop -> 
+\end{BoxedSample}
+
+  \item [defined({\em Macro})]\index{ProTop!defined}\ \\
+  This instruction checks for the existence of macros which unify with {\em
+  Macro}. The return status indicates success or failure.
+  %
+\begin{BoxedSample}
+  ProTop -> |defined(mac).|
+  no.
+  ProTop -> |mac := true.|
+  ok.
+  ProTop -> |defined(mac).|
+  ok.
+\end{BoxedSample}
+
+  \item [{\em Macro}]\ \\
+  A macro is executed when its name is encountered as command. Since the
+  built-in commands have precedence over macros it is not possible to redefine
+  a built-in.
+
+  \item [op({\em Precedence}, {\em Accosiativity}. {\em Operator})]\ 
+    \index{ProTop!op}\\
+    This instruction can be used to define operators like in Prolog. This
+    feature can be used to make the input to \ProTop{} better readable for
+    humans. 
+  %
+\begin{BoxedSample}
+  ProTop -> |op(900,fx,say).|
+  ok.
+  ProTop -> |say(X) := writeln(X).|
+  ok.
+  ProTop -> |say hello.|
+  hello
+  ok.
+\end{BoxedSample}
+\end{description}
+
+\section{Options Management}
+
+\begin{description}
+  \item [{\em Option} = {\em Value}]\index{ProTop!=}\ \\
+  This instruction sets or gets the value of the option {\em Option}. If {\em
+  Value} is not a variable then this value is stored in {\em Option}.
+  Otherwise {\em Value}\/ is unified with the actual value of {\em Option}.
+  {\em Option} is required to be a symbol.
+
+\begin{BoxedSample}
+  ProTop -> |verbose = off.|
+  ok.
+  ProTop -> |verbose = VERB, writeln(VERB).|
+  off
+  ok.
+\end{BoxedSample}
+
+  \item [reset\_options]\index{ProTop!reset\_options}\ \\
+  This instruction resets all options to their default values. It always
+  succeeds and produces no output.
+
+  \item [list options]\index{ProTop!list options}\ \\
+  This instruction prints a list of all options together with their values to
+  the screen.
+
+  \item [list option({\em Option})]\index{ProTop!list option}\ \\
+  This instruction prints a single option {\em Option}\/ and its value to the
+  screen.
+  %
+\begin{BoxedSample}
+  ProTop -> |list option prover.|
+         prover = procom(extension\_procedure)
+  ok.
+\end{BoxedSample}
+
+\end{description}
+
+\section{Proving}
+
+\begin{description}
+
+  \item [prove({\em File})]\index{ProTop!prove}\ \\
+  This instruction performs compilation and running of the compiled prover.
+\end{description}
+
+
+\section{Report Generation}
+
+
+\begin{description}
+  \item [report:file] |= "report.tex"|\\
+  This option names the report file to be generated.
+
+  \item [report:ignore\_options]|= ['run:remove_prover',match('ProTop'),...]|\\
+  This option contains a list of specifications for options which should not be
+  carried over to the report file. Several types of elements of such a list
+  are recognized:
+  \begin{description}
+    \item [{\em 'symbol'}] A symbol selects the option named.
+    \item [match({\em 'symbol'})] A match selects all options contain {\em
+    symbol} as substring.
+  \end{description}
+
+  \item [report:style\_options] |= ["p-r"]|\\
+  This option contains a list of style options (their names as strings) which
+  are used when generating a proof report. |"p-r"| is needed to print the
+  constructs in the generates \LaTeX{} file. You may consider providing an
+  alternative style options file to change the appearance. Otherwise you can
+  add options like |"11pt"| to modify the size of the fonts used etc.
+
+  \item [report:style\_path] |= "..."|\\
+  This option names the place where additional style files for \LaTeX{} can be
+  found. It is automatically set during the installation process to point into
+  the installation directory (in fact the {\sf input} subdirectory).
+  The value of this option is a string.
+
+  Several paths can be given by separating them with a colon (:).
+
+  \item [report:latex] |= latex|\\
+  This option names a command executable in the Bourne shell (sh) to start
+  \LaTeX{}. It may be necessary to specify the full path name if the command
+  is not on the shell search path (environment variable |$PATH|).%$
+
+  \item [report:flags] |= [preamble,titlepage,text,comment,time,options,matrix,tree]|\\
+  This option controlls which parts of the proof report are to be generated.
+  It contains a list of the following key words:
+
+  \def\X[#1]{{\bf #1}&}
+  \begin{tabular}{lp{.7\textwidth}}
+    \X[preamble]                \\
+    \X[titlepage]               \\
+    \X[text]            \\
+    \X[comment]         \\
+    \X[time]            \\
+    \X[options]         \\
+    \X[matrix]          \\
+    \X[tree]
+  \end{tabular}
+
+  \item [report:sections] |= [comment, text, matrix, options, times, proof]|\\
+  This option controlls which subsections to include for each run of the
+  prover. The following key words are recognized:
+
+  \begin{tabular}{lp{.7\textwidth}}
+    \X[comment] Include the comments as \TeX\ comments. \\
+    \X[text]    Include the descriptive text. \\
+    \X[matrix]  Include the internal representation of the matrix. \\
+    \X[options] Include a list of options into the report. \\
+    \X[times]   Include a table of times into the report. \\
+    \X[proof]   Include the proof (tree/description) into the report.
+  \end{tabular}
+
+  \item [report:tree\_flags] |= [dx(100),dy(100),tree,info]|\\
+  This option contains a list of keywords controlling the appearance of the
+  proof. The following key words are recognized:
+
+  \begin{tabular}{lp{.7\textwidth}}
+    \X[tree]            \\
+    \X[info]            \\
+    \X[dx($\Delta x$)]          \\
+    \X[dy($\Delta y$)]
+  \end{tabular}
+
+\end{description}
+
+
+\begin{description}
+  \item [report init({\em ReportFile})]\index{ProTop!report init}\ \\
+  This instruction initializes the report file {\em ReportFile}. Subsequent
+  actions may leave a message in this file. Depending on the value of the
+  option |ProTop:backup| an existing file is saved or overwritten (see page
+  \pageref{ProTop:backup}).
+
+  \item [report init]\index{ProTop!report init}\ \\
+  This instruction initializes the report file from the option |log_file|. See
+  also above.
+
+  \item [report author({\em Text})]\index{ProTop!report author}\ \\
+  This instruction writes the text {\em Text} to the report file. This text is
+  intended to be used as title of an automatically generated report.
+
+  \item [report title({\em Text})]\index{ProTop!report title}\ \\
+  This instruction writes the text {\em Text} to the report file. This text is
+  intended to be used as author of an automatically generated report.
+
+  \item [report comment({\em Text})]\index{ProTop!report comment}\ \\
+  This instruction writes the text {\em Text} as comment to the report file.
+  This report file has to be initialized with |report_init| before this
+  instruction is used.
+
+  \item [report text({\em Text})]\index{ProTop!report text}\ \\
+  This instruction writes the text {\em Text} as descriptive text to the
+  report file. The report file has to be initialized with |report_init|
+  before this instruction is used. 
+
+  \item [report section({\em Text})]\index{ProTop!report section}\ \\
+  This instruction writes the text {\em Text} as short title of the following
+  proof attempt to the report file. It may also be used when tables are
+  typeset.  The report file has to be initialized with |report_init|
+  before this instruction is used. 
+
+  \item [report label({\em Label})]\index{ProTop!report label} This
+  instruction writes the string {\em Label} as identifier for the following
+  proof attempt to the report file. It is also used when tables are typeset.
+  The report file has to be initialized with |report_init| before this
+  instruction is used.
+
+  \item [define\_table({\em Name}, {\em Spec})]\index{ProTop!define\_table}
+
+  \item [remove\_table({\em Name})]\index{ProTop!remove\_table}
+
+  \item [generate\_report]\index{ProTop!generate\_report}\ \\
+  This instruction reads the log file and generated the \LaTeX{} source from
+  it. This report file can be processed using |latex_report| of processed by
+  \LaTeX{} manually.
+
+  {\bf Note:} A \LaTeX{} style file is required to process the generated
+  \LaTeX{} code. This style file can be found in the {\sf input} subdirectory
+  of the \ProTop{} installation directory.
+
+  \item [generate\_report({\em Files})]\index{ProTop!generate\_report}\ \\
+  This instruction reads the file {\em Files} and generated the \LaTeX{}
+  source from it.
+
+  \item [latex\_report]\index{ProTop!latex\_report}\ \\
+  This instruction tries to run \LaTeX{} on a formerly generated report.
+
+  \item [make\_report]\index{ProTop!make\_report}\ \\
+  This instruction generates a report and runs \LaTeX{} on the resulting
+  source file. The file given in the option |log_file| is used for analysis.
+
+  \item [make\_report({\em Files})]\index{ProTop!make\_report}\ \\
+  This instruction generates a report from the files {\em Files}\ and runs
+  \LaTeX{} on the resulting source file.
+
+\end{description}
+
+\section{Misc Instructions}
+
+\begin{description}
+  \item [pwd]\index{ProTop!pwd}\ 
+    \\
+    This instruction prints the current working directory to the standard
+    output stream.
+  %
+\begin{BoxedSample}
+  ProTop -> |pwd.|
+  /system/ProCom/
+  ok.
+\end{BoxedSample}
+
+  \item [pwd(Dir)]\index{ProTop!pwd}\ 
+    \\
+    This instruction unifies it's argument with the current directory. Thus it
+    is possible to get your hands on the current directory in script files.
+  %
+\begin{BoxedSample}
+  ProTop -> |pwd(X).|
+  ok.
+  ProTop -> |pwd(X),writeln(X).|
+  /system/ProCom/
+  ok.
+\end{BoxedSample}
+
+  \item [cd(Dir)]\index{ProTop!cd}\ \\
+  This instruction tries to set the current directory to the one given as
+  argument. |Dir| has to be a string or atom which corresponds to a valid
+  directory name.
+  %
+\begin{BoxedSample}
+  ProTop -> |pwd.|
+  /system/ProCom/
+  ok.
+\end{BoxedSample}
+
+  \item [ls]\index{ProTop!ls}\ \\
+  This instruction lists all files in the current directory on the standard
+  output stream.
+
+
+  \item [ls(Dir)]\index{ProTop!ls}\ \\
+  This instruction lists all files in the directory |Dir| on the standard
+  output stream.
+
+  \item [call({\em Goal})]\index{ProTop!eval}\ \\
+  This instruction forwards {\em Goal}\ to the underlying Prolog for execution.
+  The Prolog goal |Goal| is called in the module |eclipse|.
+
+  This instruction is strongly discouraged. It may be disabled in a future
+  version of \ProTop.
+\end{description}
+
+The \ProTop{} instructions shown in this and the previous sections have been
+written with parentheses around arguments. For most commands with one argument
+ist is also possible to omit the parentheses. This feature is shown in the
+following example.
+
+\begin{BoxedSample}
+  ProTop -> |cd '/etc'.|
+  ok.
+  ProTop -> |pwd.|
+  /etc
+  ok.
+  ProTop -> |status version.|
+    This is ProTop version \Version
+  ok.
+\end{BoxedSample}
+
+
+
+\section{Command Line Flags of \ProTop}
+
+If \ProTop{} has been proberly installed then the executable\footnote{In fact
+  this is an \eclipse{} saved state.} {\sf protop} should exist. This program
+can be started like any other program by typing its name in a shell --- if it
+is on your shells search path.  In addition the executable accepts the
+following command line arguments:
+
+\begin{description}
+\item[--a]\ \\
+  The backward compatibility file is loaded when this flag is given. The
+  loading occurs at once. Thus it is possible to overwrite things later.
+\item[--d]\ \\
+  The debugging of script files is turned on. This is identical to turning on
+  the option |ProTop:debug|.
+\item[--f {\em file}]\ \\
+  The script file {\em file}\/ is evaluated. This has the same effect as the
+  \ProTop{} instruction {\bf include({\em file}\/)}. The success or failure is
+  ignored. I.e. the initializing sequence continues even if the file could not
+  be found.
+\item[--h]\ \\ Write a short summary of the command line options and terminate
+  the \ProTop{} process. The exit status 0 is returned to the operating
+  system.
+\item[--q]\ \\
+  Ususally the user's file {\sf .protop} is evaluated after the command line
+  arguments. This switch turns off this behaviour.
+\item[--R]\ \\
+  The user's {\sf .protop} file is loaded at once. The additional evaluation
+  after the end of the command line arguments is disabled. No message is
+  printed in case it is not found. Thus this switch can be used to suppress
+  the message indicating a missing {\sf .protop} file.
+\item[--v]\ \\ The version of \ProTop{} is printed and then the \ProTop{}
+  process is terminated. The exit status 0 is returned to the operating
+  system.
+\item[--x]\ \\
+  The \ProTop{} process is terminated. The exit status 0 is returned to the
+  operating system.
+\end{description}
+
+Command line arguments which are not understood are silently ignored.
+
+Consider the following example:
+
+\begin{BoxedSample}
+  \$ protop -R -f ancient
+\end{BoxedSample}
+
+In this example the user's {\sf .protop} file is searched at once. Then the
+script file ancient is loaded. \ProTop{} comes with a script file {\sf
+  ancient.pt} This script files defines some instructions which have become
+obsolete. It might be neccesary to load those macros in order to run older
+scripts. Thus you can see this an compatibility mode of \ProTop.
+
+
+
+
+\section{The Prolog Interface}\label{ProTop:prolog.interface}
+
+\ProTop{} instructions can also be executed from within Prolog. This is simpy
+done by passing a list of instructions to the predicate |protop/1|. This
+assumes that the module |protop| has been activated.
+%
+\begin{BoxedSample}\raggedright
+\$ |eclipse|
+[eclipse 1]: |ensure_loaded('ProTop/protop.pl'),|
+             |use_module(protop).|
+protop.cfg compiled traceable 4480 bytes in 0.02 seconds
+/usr/local/lib/eclipse/3.4.5/lib/lists.pl compiled traceable ...
+/usr/local/lib/eclipse/3.4.5/lib/util.pl compiled traceable ...
+...
+protop.pl  compiled traceable 26208 bytes in 2.65 seconds
+
+yes.
+[eclipse 2]: |protop([show(version)]).|
+        This is ProTop version \Version
+
+yes.
+[eclipse 3]: 
+\end{BoxedSample}
+
+\def\PrologFILE{protop}
+
+\Predicate protop/0().
+
+This predicate starts an interactive session with the \ProTop{} interpreter.
+Commands are read from the standart input and executed immediately. Messages
+may be written to the standart output.
+
+\Predicate protop/1(+Instructions).
+
+This predicate takes a list of \ProTop{} instructions |Instructions| and
+executes them in turn. |Instructions| can also be a symbol or string. In this
+case it is interpreted as a file name and commands are executed from this
+scripts file if it can be found.
+
+This predicate succeeds if and only if the instruction does.
+
+
+
+
+\chapter{Proving with ProTop}%
+\begin{figure}
+  \begin{center}
+    \mbox{\psfig{file=skeleton.eps}}
+    \caption{Proving with ProTop}\label{fig:skeleton}
+  \end{center}
+\end{figure}
+
+The view of ProTop on the proving process is depicted in figure
+\ref{fig:skeleton}. The starting point is a problem. This problem is usually
+given in normal form as a set of clauses. Before the contents of this file is
+parsed and stored in the internal matrix format it is piped through a series
+of input filters. These filters provide a powerful means to preprocess the
+problem. E.g. a normal form transformation can take place in a filter.
+
+A filter communicates the result via a stream to the next filter. If no filter
+is left to process the result is parsed and stored to be used by the further
+phases.
+
+One further step is a preprocessing in the classical sense. Here well known
+reductions are applied and the matrix is modified accordingly.
+
+The next step is the activation of the selected prover. Provers can be
+classified into two major categories: compilers and interpreters. Compilers
+generate a stand alone Prolog program which is loaded into the running ProTop
+and executed.  The interpreters do not need to load a program into ProTop.
+This means that interpreters work directly on the internal representation of
+the problem. Alternatively external provers can be attached to ProTop. They
+are also treated like interpreters.
+
+An an example for an external prover {\em otter} has been integrated into
+\ProTop. External provers are started via a system call after the problem has
+been written to a file in a prover specific format. At the end the result has
+to be read back in from a file and converted into something that ProTop can
+work with.
+
+Most provers can be controlled by a variety of means. Most common are flags
+which can turn on or off certain features or set linits etc. The prover
+\ProCom{} which was developed in parallel to \ProTop{} offers additionally the
+possibility to load prolog modules controlling its behavior dynamically.
+Furthermore Prolog code can be fed in by using libraries which are linked to
+the compiled code.
+
+%
+% Local Variables: 
+% mode: latex
+% TeX-master: "manual"
+% End: 

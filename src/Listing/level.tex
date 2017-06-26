@@ -1,0 +1,82 @@
+%%*****************************************************************************
+%% $Id: level.tex,v 1.1 1995/01/27 13:45:38 gerd Exp $
+%%*****************************************************************************
+%% Author: Gerd Neugebauer
+%%-----------------------------------------------------------------------------
+\documentstyle[11pt,dina4]{article}
+
+\def\Node(#1,#2)#3{\count255=#2\multiply\count255
+  8\put(\count255,#1){\makebox{\stripPath #3 }}}
+\def\stripPath#1/#2{#2}
+
+\begin{document}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+{\unitlength=10pt\tiny
+\begin{picture}(12,12)
+ \Node(1,0){lib/lists.pl}
+ \Node(2,0){lib/numbervars.pl}
+ \Node(3,0){lib/sorts.pl}
+ \Node(4,0){lib/util.pl}
+ \Node(5,0){ProCom/capri.pl}
+ \Node(6,0){ProCom/p--simple.pl}
+ \Node(7,0){System/eq\_member.pl}
+ \Node(8,0){System/hook.pl}
+ \Node(9,0){System/literal.pl}
+ \Node(10,0){System/message.pl}
+ \Node(11,0){System/os.pl}
+ \Node(12,0){System/proof.pl}
+ \Node(13,0){System/time.pl}
+ \Node(14,0){System/varlist.pl}
+ \Node(1,1){lib/strings.pl}
+ \Node(2,1){ProCom/p\_check\_desc.pl}
+ \Node(3,1){ProCom/p\_info.pl}
+ \Node(4,1){ProCom/unfold.pl}
+ \Node(5,1){ProTop/proof\_tree.pl}
+ \Node(6,1){ProTop/report\_summary.pl}
+ \Node(7,1){System/add\_arg.pl}
+ \Node(8,1){System/find\_file.pl}
+ \Node(9,1){System/maplist.pl}
+ \Node(10,1){System/matrix.pl}
+ \Node(11,1){System/options.pl}
+ \Node(12,1){System/qsort.pl}
+ \Node(1,2){Otter/otter.pl}
+ \Node(2,2){Pool/pool.pl}
+ \Node(3,2){Prepare/complete\_goals.pl}
+ \Node(4,2){Prepare/connection\_graph.pl}
+ \Node(5,2){ProCom/p\_put.pl}
+ \Node(6,2){ProCom/p\_reorder.pl}
+ \Node(7,2){ProTop/proof\_report.pl}
+ \Node(8,2){Reductions/red\_pure.pl}
+ \Node(9,2){Setheo/setheo.pl}
+ \Node(10,2){System/find\_module.pl}
+ \Node(11,2){System/log.pl}
+ \Node(12,2){System/run\_prover.pl}
+ \Node(1,3){ProCom/optimize.pl}
+ \Node(2,3){Reductions/reductions.pl}
+ \Node(3,3){System/parse.pl}
+ \Node(1,4){ProCom/linker.pl}
+ \Node(2,4){System/run\_filter.pl}
+ \Node(1,5){Prepare/prove.pl}
+ \Node(2,5){ProCom/p\_\_depth\_first.pl}
+ \Node(3,5){ProCom/p\_\_iterative\_broadening.pl}
+ \Node(4,5){ProCom/p\_\_iterative\_deepening.pl}
+ \Node(5,5){ProCom/p\_\_iterative\_inferences.pl}
+ \Node(6,5){ProCom/p\_\_iterative\_widening.pl}
+ \Node(7,5){ProCom/p\_predicate.pl}
+ \Node(1,6){ProCom/p\_body.pl}
+ \Node(2,6){ProCom/p\_driver.pl}
+ \Node(3,6){ProCom/p\_options.pl}
+ \Node(4,6){ProTop/protop.pl}
+ \Node(1,7){ProCom/p\_goal.pl}
+ \Node(1,8){ProCom/capricore.pl}
+ \Node(1,9){ProCom/procom.pl}
+
+  \end{picture}
+}
+
+\end{document}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Local Variables: 
+% mode: latex
+% TeX-master: nil
+% End: 

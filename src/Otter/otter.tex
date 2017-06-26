@@ -1,0 +1,273 @@
+%%*****************************************************************************
+%% $Id: otter.tex,v 0.00 1994/06/14 15:34:29 gerd Exp $
+%%*****************************************************************************
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%****************************************************************************
+
+\chapter{Using Otter within \ProTop}
+
+
+\section{Overview}
+
+\ProTop{} is able to handle internal and external provers. The capability to
+handle external provers is demonstrated by the integration of otter. Otter is
+a prover written in C which has to be run as a separate process. Otter gets
+its problem specification (the matrix) together with the flags (options) in
+one single file. The result consists of informative messages, like runtime,
+and the final proof or failure indicators. Those results are also collected in
+a file.
+
+\ProTop{} has to translate to internal representation of the matrix in a form
+acceptable by otter. The external process has to be started and finally the
+output has to be analyzed and translated into a form handeled by \ProTop.
+
+To start otter the option |prover| has to be set to the value |otter|. Then
+the proof can be started as usual. This is shown in the example in
+figure~\ref{fig:otter} which assumes us to be in the \ProTop{} interactive
+mode.
+
+\begin{figure}[ht]
+\begin{BoxedSample}
+  ProTop -> |prover = otter.|
+  ok.
+  ProTop -> |prove 'eder1-2'.|
+  \% No input filter requested
+  \% Reading matrix file Samples/eder1-2
+  2 clauses read in 17 ms 
+  ...
+
+  time("user CPU time       ",20).
+  time("system CPU time     ",70).
+  time("wall-clock time     ",0).
+  time("hyper\_res time      ",0).
+  time("for\_sub time        ",0).
+  time("back\_sub time       ",0).
+  time("conflict time       ",0).
+  time("demod time          ",0).
+  ok.
+  ProTop -> 
+\end{BoxedSample}
+\caption{A session with otter.}\label{fig:otter}
+\end{figure}
+
+
+
+\section{Options for Otter}
+
+The module otter provides the following options to adjust its behaviour:
+
+\begin{description}
+  \item [otter:flags] | = [auto,-print_given].|
+    \\
+    This option contains a list of flags for Otter. a detailed description can
+    be found in section \ref{otter:flags}.
+
+  \item [otter:executable] | = "otter".|
+    \\
+    This option contains the executable UNIX command which starts otter. If
+    this executable can not be found on the search path of the UNIX shell used
+    it might be neccesary to specify the full file name --- including the
+    complete path.
+
+    This option is initialized from the valued specified in the Makefile
+    during the installation process. Usually it should not need modification.
+
+  \item [otter:tmpdirs] | = [indir,".","/tmp","~"].|
+    \\
+    This option specifies a list of directories which might be used to create
+    intermediate files. The list is tried from left to right to find a
+    directory which is writable. The first such directory is used to create
+    the intermediate files for otter.
+
+    The elements of this list are interpreted as directories. They can be
+    absolute or relative to the current directory. The tilde |~| can be used
+    to refer to the home directory of the user. The special symbol |indir| can
+    be used to refer to the directory containing the input file.
+
+  \item [otter:remove\_tmp\_files] | = off.|
+    \\
+    At the end of the proof attempt the intermediate files created for the
+    communication with otter are removed if this boolean option is
+    |on|. Otherwise they are left unchanged. This can be useful to understand
+    how otter is called and get more details what otter has responded.
+
+\end{description}
+
+
+
+\section{Flags of Otter}\label{otter:flags}
+
+Otter can be configured with a large number of flags. Most of those
+flags\footnote{Only those flags which might disturb \ProTop{} have been
+  disabled.} are usable from within \ProTop. For a detailed discussion of the
+flags we refer to \cite{mccune:otter}. The following description only
+mentiones a few. The main emphasis is on the way how to use them from within
+\ProTop.
+
+Otter has two kind of flags: boolean flags and numeric flags. The
+specifications for those flags is combined in the option |otter:flags| which
+contains a list of those.
+
+The names of the flags are symbols in the sense of Prolog. Thus those names
+are used to name the flags in the context of \ProTop{} as well.
+
+\subsection{Boolean Flags}
+
+Boolean flags can be set (on) or reset (off). If a boolean flag {\em flag}
+occurs in the list of flags |otter:flags| then this is interpreted as a
+positive occurrence and the corresponding Otter flag is turned on.
+
+E.g. if the list in |otter:flags| contains the element |auto| then the Otter
+flag |auto| is set.\footnote{The flag |auto| turns on the analysis automatic
+  setting of flags according to the properties of the problem given.}
+
+A negated flag in the list |otter:flags| is marked with a preceeding minus
+|-|. Flags marked in this way are turned off in Otter.
+
+E.g. if the list in |otter:flags| contains the element |-print_given| then the
+Otter flag |print_given| is reset.\footnote{The flag {\tt print\_given} turns
+  on the reporting of input clauses in the output.}
+
+
+\subsection{Numeric Flags}
+
+Numeric flags can take numeric values. Arbitrary numbers can be assigned to
+some of the numeric flags. Other can take only values in a specific
+range. Those restrictions are checked in the \ProTop{} interface to Otter.
+
+To assign a value {\em n}\/ to a numeric flag {\em flag}\/ simply add an
+element {\em flag {\tt=} n} to the list of flags |otter:flags|.
+
+E.g. if the list in |otter:flags| contains the element |max_kept=1000000| then
+the numeric flag |max_kept| is set to the value 1000000.\footnote{The flag
+  {\tt max\_kept} contains the maximum number of resolvents kept.}
+
+
+\subsection{List of Flags}
+
+\begin{figure}[t]
+{\scriptsize
+\catcode`|=\other
+\def\OtterFlag#1#2.{\tt #1&#2\\\hline}%
+\null\hfill
+\begin{tabular}{|p{15em}c|}\hline \bf Flag & \bf Type \\\hline\hline
+  \OtterFlag{atom\_wt\_max\_args	}{boolean}.
+  \OtterFlag{auto			}{boolean}.
+  \OtterFlag{back\_demod		}{boolean}.
+  \OtterFlag{back\_sub			}{boolean}.
+  \OtterFlag{binary\_res		}{boolean}.
+  \OtterFlag{bird\_print		}{default}.
+  \OtterFlag{check\_arity		}{boolean}.
+  \OtterFlag{control\_memory		}{boolean}.
+  \OtterFlag{delete\_identical\_nested\_skolem}{boolean}.
+  \OtterFlag{demod\_history		}{boolean}.
+  \OtterFlag{demod\_inf			}{boolean}.
+  \OtterFlag{demod\_limit		}{integer}.
+  \OtterFlag{demod\_linear		}{boolean}.
+  \OtterFlag{demod\_out\_in		}{boolean}.
+  \OtterFlag{detailed\_history		}{boolean}.
+  \OtterFlag{display\_terms		}{default}.
+  \OtterFlag{dynamic\_demod		}{boolean}.
+  \OtterFlag{dynamic\_demod\_all	}{boolean}.
+  \OtterFlag{dynamic\_demod\_lex\_dep	}{boolean}.
+  \OtterFlag{echo\_included\_files	}{boolean}.
+  \OtterFlag{eq\_units\_both\_ways	}{boolean}.
+  \OtterFlag{factor			}{boolean}.
+  \OtterFlag{for\_sub			}{boolean}.
+  \OtterFlag{for\_sub\_fpa		}{boolean}.
+  \OtterFlag{fpa\_literals		}{integer(0,100)}.
+  \OtterFlag{fpa\_terms			}{integer(0,100)}.
+  \OtterFlag{free\_all\_mem		}{boolean}.
+  \OtterFlag{hyper\_res			}{boolean}.
+  \OtterFlag{index\_for\_back\_demod 	}{boolean}.
+  \OtterFlag{input\_sos\_first		}{boolean}.
+  \OtterFlag{interactive\_given		}{default}.
+  \OtterFlag{interrupt\_given		}{default}.
+  \OtterFlag{knuth\_bendix		}{boolean}.
+  \OtterFlag{lex\_order\_vars		}{boolean}.
+  \OtterFlag{lrpo			}{boolean}.
+  \OtterFlag{max\_distinct\_vars	}{integer}.
+  \OtterFlag{max\_gen			}{integer}.
+  \OtterFlag{max\_given			}{integer}.
+  \OtterFlag{max\_kept			}{integer}.
+  \OtterFlag{max\_literals		}{integer}.
+  \OtterFlag{max\_mem			}{integer}.
+  \OtterFlag{max\_proofs		}{integer}.
+  \OtterFlag{max\_seconds		}{integer}.
+  \OtterFlag{max\_weight		}{integer}.
+  \OtterFlag{min\_bit\_width		}{integer}.
+\end{tabular}\hfill
+\begin{tabular}{|p{15em}c|}\hline \bf Flag & \bf Type \\\hline\hline
+  \OtterFlag{neg\_hyper\_res		}{boolean}.
+  \OtterFlag{neg\_weight		}{integer}.
+  \OtterFlag{no\_fanl			}{boolean}.
+  \OtterFlag{no\_fapl			}{boolean}.
+  \OtterFlag{order\_eq			}{boolean}.
+  \OtterFlag{order\_history		}{boolean}.
+  \OtterFlag{order\_hyper		}{boolean}.
+  \OtterFlag{para\_all			}{boolean}.
+  \OtterFlag{para\_from			}{boolean}.
+  \OtterFlag{para\_from\_left		}{boolean}.
+  \OtterFlag{para\_from\_right		}{boolean}.
+  \OtterFlag{para\_from\_units\_only 	}{boolean}.
+  \OtterFlag{para\_from\_vars		}{boolean}.
+  \OtterFlag{para\_into			}{boolean}.
+  \OtterFlag{para\_into\_left		}{boolean}.
+  \OtterFlag{para\_into\_right		}{boolean}.
+  \OtterFlag{para\_into\_units\_only 	}{boolean}.
+  \OtterFlag{para\_into\_vars		}{boolean}.
+  \OtterFlag{para\_ones\_rule		}{boolean}.
+  \OtterFlag{para\_skip\_skolem		}{boolean}.
+  \OtterFlag{pick\_given\_ratio		}{integer}.
+  \OtterFlag{pretty\_print		}{default}.
+  \OtterFlag{pretty\_print\_indent	}{integer(4,16)}.
+  \OtterFlag{print\_back\_demod		}{boolean}.
+  \OtterFlag{print\_back\_sub		}{boolean}.
+  \OtterFlag{print\_given		}{boolean}.
+  \OtterFlag{print\_kept		}{clear}.
+  \OtterFlag{print\_lists\_at\_end	}{boolean}.
+  \OtterFlag{print\_new\_demod		}{boolean}.
+  \OtterFlag{print\_proofs		}{default}.
+  \OtterFlag{process\_input		}{boolean}.
+  \OtterFlag{prolog\_style\_variables	}{set}.
+  \OtterFlag{propositional		}{default}.
+  \OtterFlag{really\_delete\_clauses	}{default}.
+  \OtterFlag{report			}{integer}.
+  \OtterFlag{simplify\_fol		}{boolean}.
+  \OtterFlag{sort\_literals		}{boolean}.
+  \OtterFlag{sos\_queue			}{boolean}.
+  \OtterFlag{sos\_stack			}{boolean}.
+  \OtterFlag{stats\_level		}{default}.
+  \OtterFlag{symbol\_elim		}{boolean}.
+  \OtterFlag{term\_wt\_max\_args	}{boolean}.
+  \OtterFlag{unit\_deletion		}{boolean}.
+  \OtterFlag{ur\_res			}{boolean}.
+  \OtterFlag{very\_verbose		}{default}.
+\end{tabular}\hfill\null}
+
+  \caption{The Flags of Otter}\label{fig:otter.flags}
+\end{figure}
+
+The table \ref{fig:otter.flags} contains a complet list of Otter flags as
+understood by the \ProTop/Otter interface.
+See the documentation of Otter \cite{mccune:otter} for further details.
+
+{\em Type} can have one of the following values:
+
+\begin{list}{}{\parsep=0pt\itemsep=0pt\labelwidth=9em\leftmargin=10em}
+\item [\bf boolean] denotes a boolean flag. it can be turned on or off.
+\item [\bf set] denotes a boolean flag which must be turned on.
+\item [\bf clear] denotes a boolean flag which must be turned off.
+\item [\bf default] denotes a flag which can not be changed.
+\item [\bf integer] denotes a numeric flag which can take arbitrary values.
+\item [\bf integer({\it min},{\it max})] denotes a numeric flag which can take
+  values in the range from {\it min}\/ to {\it max}. 
+\end{list}

@@ -1,0 +1,20 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Ginsberg and
+  Harvey}{1990}]{ginsberg.harvey:iterative}
+Matthew~L. Ginsberg and William~D. Harvey.
+\newblock Iterative broadening.
+\newblock In {\em AAAI-90 --- Proceedings of the 9\/$^{th}$ AAAI National
+  Conference on Artificial Intelligence}. MIT Press, 1990.
+
+\bibitem[\protect\citeauthoryear{McCune}{1994}]{mccune:otter}
+William~W. McCune.
+\newblock Otter 3.0 reference manual and guide.
+\newblock Technical Report ANL-94/6, Argonne National Laboratory, January 1994.
+
+\bibitem[\protect\citeauthoryear{Stickel}{1984}]{stickel:prolog}
+Mark~E. Stickel.
+\newblock A {P}rolog {T}echnology {T}heorem {P}rover.
+\newblock {\em New Generation Computing}, 2:371--383, July 1984.
+
+\end{thebibliography}

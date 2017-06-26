@@ -1,0 +1,452 @@
+%%%****************************************************************************
+%%% $Id: libraries.tex,v 1.5 1995/02/13 20:05:14 gerd Exp $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@intellektik.informatik.th-darmstadt.de
+%%% 
+%%%****************************************************************************
+% Master File: manual.tex
+
+\section{Libraries}
+
+The next stage of modification beyond the adaption of option is to replace
+libraries by own code. For this purpose we will describe in detail the
+libraries used. Thus it is possible to write own libraries for new Prolog
+dialects. Additionally it also enables you to replace the libraries provided
+with \ProCom{} by your own versions which have an improved performance or an
+enhance functionality.
+
+\paragraph{Note:} Don't modify the libraries provided with \ProCom. Make
+modified versions with a different name instead and set the appropriate option
+to tell \ProCom\ to use this modified version. It is also possible to exploit
+the search mechanism for libraries (see \ref{sec:lib.search}) to place the
+modified version in a directory which is searched before the system library.
+
+In the following sections we will describe the libraries and the predicates
+they are expected to provide.
+
+
+\subsection{Library Search}\label{sec:lib.search}
+\index{library search}
+
+
+At the end of the compilation process the linker tries to add libraries to the
+code which provide required predicates. For this purpose the linker needs to
+know which predicates are required and where to find libraries which might
+provide them. Requirements of predicates are specified by the implementor, in
+the Capri interpreter, in the Capri modules, or in the libraries.
+
+When the linker is initialized it analyzes the files given to it to find out
+which predicates are defined there. Usually the files known to the linker are
+initially taken from several option (those containing |::|). The instruction
+|link_file/1| in a Capri module can be used to provide additional files.
+
+The link files are searched in the following way. The option
+|ProCom:link_path| (see section \ref{opt:ProCom::link_path}) contains a list
+of directories which are used to find the libraries. Two subdirectories of the
+directories given are also considered. The first subdirectory is named like
+the Prolog dialect specified by the option |prolog| (see section
+\ref{opt:prolog}). The second subdirectory is called {\sf default}.
+
+The general idea is to place generic code which should run on each Prolog
+system in the subdirectoy {\sf default} and the dialect specific modules in
+the specific subdirectories, e.g. {\sf eclipse}.
+
+In addition to the intermediate directories the libraries are augmented by the
+extension |.pl| during the search. To make it clear which files are considered
+let us have a look at an example.
+
+Suppose the option |prolog| has the value |eclipse| and the option
+|ProCom:link_path| has the value |[.,ProCom]|. When the linker looks for a
+library named |my_lib| the following locations are inspected until an existing
+file is found:
+
+{\tt
+\begin{tabular}{l}
+  ./my\_lib
+  \\./my\_lib.pl
+  \\./eclipse/my\_lib
+  \\./eclipse/my\_lib.pl
+  \\./default/my\_lib
+  \\./default/my\_lib.pl
+  \\ProCom/my\_lib
+  \\ProCom/my\_lib.pl
+  \\ProCom/eclipse/my\_lib
+  \\ProCom/eclipse/my\_lib.pl
+  \\ProCom/default/my\_lib
+  \\ProCom/default/my\_lib.pl
+\end{tabular}
+}
+
+
+\subsection{Contents of Library Files}\label{sec:contents.library}
+\index{library file}
+
+Library files are mainly usual Prolog files --- with some exceptions.
+
+You should be very carefully when making a module in a library. Be sure that
+you completely understand the translation process and can predict the
+resulting Prolog code.
+
+Since the library file is read by the linker each operator declaration must be
+known to the linker. Operator declarations in the library are not evaluated.
+
+Most of the instructions are simply passed to the output file. Nevertheless the
+linker uses some instructions to control its behavior. The folloing list
+describes instructions evaluated by the linker. Each such instruction is
+embedded in a single Prolog goal. Accumulating several of them or embedding in
+other constructs won't work.
+
+In the following list the expression {\em Pred} always denotes a predicate
+specification in the form {\em Functor/Arity}.
+\begin{description}
+  \item [:- expand\_predicate({\em Pred})]\index{expand\_predicate}\ \\
+  This instruction is passed to the optimizer to declare the predicate {\em
+  Pred} as expandable. If the option |ProCom:expand| (see section
+  \ref{opt:ProCom:expand}) is turned on them expandable predicates are
+  replaced by their bodies.
+
+  You should only declare non-recursive, single-clause predicates as
+  expandable\footnote{A future version of the linker may determine those
+  predicates automatically.}.  Recursive predicates can not be expanded
+  properly.  Don't try it. Multi-clause predicates may also cause problems.
+
+  The declaration of expandable predicates must preceed their definition!
+
+  \item [:- provide\_predicate({\em Pred})]\index{provide\_predicate}\ \\
+  This instruction tells the linker that the predicate {\em Pred} is defined
+  in this library. This should usually be not necessary since the linker
+  analyzes the Prolog program to see which predicates are defined.
+  Nevertheless it can be necessary to use it to declare a Prolog built-in
+  which is required (see below).
+
+  \item [:- require\_predicate({\em Pred})]\index{require\_predicate}\ \\
+  This instruction tells the linker that the predicate {\em Pred} is used in
+  this library but not defined. The linker makes not a complete analysis of
+  used and defined predicates. Instead it evaluates this instruction to get
+  the undefined predicates. This can be used to trigger the loading of other
+  libraries.
+\end{description}
+
+
+\subsection{The Init Library}\label{sec:lib.init}
+
+For some reasons it may be desirable to add some pieces of code in front of
+anything else. This can be used to adjust the behavior of the Prolog system.
+A list of libraries is taken from the option |ProCom::immediate_link| to be
+linked at the beginning (see section \ref{opt:ProCom::immediate_link}).
+
+The following sample implementations are provided with \ProCom.
+\begin{description}
+  \item [eclipse/init.pl]\ \\
+  This library turns off some debugging features to speed things up.
+  Additionally the sound unification is turned on.
+  \item [default/init.pl]\ \\
+  This library is simply empty. No initializations are needed for a vanilla
+  Prolog.
+\end{description}
+
+
+\subsection{The Module Library}\label{sec:lib.module}
+
+The resulting Prolog code can be encapsulated into a module. The head of a
+module with a fixed name and export list can be placed in a library named in
+the option |ProCom::module|.
+
+The following sample implementation is provided with \ProCom.
+\begin{description}
+  \item [eclipse/module.pl]\ \\
+  This library contains the head of a \eclipse\ module named |'ProCom prover'|
+  which exports the predicates |goal/0| and |goal/1|.
+\end{description}
+
+\paragraph{Note:} Most of the time it is not desirable to generate a stand
+alone module since \ProTop\ wrappes a module around the prover anyway.
+
+\subsection{The Path Management}\label{sec:lib.path}
+
+The data sturcture used for the path is completely encapsulated in a library.
+The option |ProCom:path| (see section \ref{opt:ProCom:path}) determines the
+library actually used. The following sample implementations are provided with
+\ProCom.
+\begin{description}
+  \item [default/path.pl]
+  \item [default/path-simple.pl]
+  \item [eclipse/path-regular.pl]\ \\
+  This library uses \eclipse\ delayed predicates to implement a variant of
+  regularity constraints.
+\end{description}
+
+The current implementations use a pair of lists to implement the path. The
+first item is the list of positive ancestors and the second one contains the
+negative ancestors.  Since the path management is encapsulated in this module
+one can replace this kind of path by another data structure. Linear lists are
+a simpler case. But also balanced binary trees can be considered. Any
+implementation which allows a fast access, e.g. by using sofisticated indexing
+mechanisms, might be worth trying it.
+
+The path management consists of the following set of predicates:
+\begin{description}
+  \item [empty\_path({\em Path})]\index{empty\_path}\ \\
+  This predicate should unify its argument with the term representing the
+  empty path. It should have at most one solution.
+
+  \item [put\_on\_path({\em Literal}, {\em OldPath}, {\em
+  NewPath})]\index{put\_on\_path}\ \\
+  This predicate modifies the path {\em OldPath} in such a way that the
+  literal {\em Literal} is in it. The result is unified with the new path {\em
+  NewPath}.
+
+  \item [put\_on\_path({\em Literal}, {\em Info}, {\em OldPath}, {\em NewPath})]\index{put\_on\_path}
+
+  \item [is\_on\_path({\em Literal}, {\em Path})]\index{is\_on\_path}\ \\
+  This predicate tries to unify {\em Literal} with an element on the path {\em
+  Path}. Upon backtracking all such candidates are tried.
+
+  \item [is\_on\_path({\em Literal}, {\em Info}, {\em
+  Path})]\index{is\_on\_path}
+
+  \item [is\_identical\_on\_path({\em Literal}, {\em
+  Path})]\index{is\_identical\_on\_path}\ \\
+  This predicate tries to find {\em Literal} on the path {\em Path}. Only
+  identical (not only unifyable) occurences are considered. This predicate
+  should not be resatisfiable.
+\end{description}
+
+
+\subsection{Sound Unification}
+
+The following sample implementations are provided with \ProCom.
+\begin{description}
+  \item [eclipse/unify.pl]\ 
+    \\
+    This library provides a sound |unify/2| predicate.
+  \item [default/unify-no-oc.pl]\ 
+    \\
+    This library provides a |unify/2| predicate not performing the occurs
+    check.
+\end{description}
+
+The following predicate is provided by those modules:
+
+\begin{description}
+  \item [unify({\em Term1}, {\em Term2})]\index{unify}\ 
+    \\
+    This predicate unifies its arguments.
+\end{description}
+
+
+
+\subsection{Sound Member Implementation}\label{sec:member}
+
+The following sample implementation is provided with \ProCom.
+\begin{description}
+  \item [default/member.pl]\ 
+    \\
+    This library uses the unify/2 predicate to perform unification. Thus it
+    depends on the unify library which unification is actually used.
+\end{description}
+
+\begin{description}
+  \item [sound\_member({\em Element}, {\em List})]\index{sound\_member}\ 
+    \\
+    This predicate implements the well known member relation. Modification may
+    be necessary to use the occurs check when required.
+\end{description}
+
+
+\subsection{Lemmas}\label{sec:lib.lemma}
+
+After the sucessful attempt to solve a subgoal the result can be stored as a
+lemma. Thus there exists a lemma library where this feature can be hooked in.
+The following sample implementations are provided with \ProCom.
+\begin{description}
+  \item [default/no-lemma.pl]\ \\
+    This library performs no lemma steps. It is just a dummy library to be
+    used if nothing else is desirable.
+  \item [default/lemma.pl]\ \\
+    This library uses the path to store local lemmata. Thus no special
+    \CaPrI{} descriptor set is needed to apply the lemmas. They are applied in
+    the course of normal reduction steps.
+\end{description}
+
+The lemma library has to provide the following predicate:
+\begin{description}
+  \item [lemma({\em Literal}, {\em PathIn}, {\em PathOut})]\index{lemma}\ \\
+    {\em Literal}\/ is the internal representation of the negated 
+    solved literal. {\em PathIn}\/ is the current path. It has to be returned
+    in {\em PathOut}, possibly enhanced by some additional literals. E.g. the
+    predicate |put_on_path/3| might be useful (cf.\
+    section~\ref{sec:lib.path}).
+\end{description}
+
+
+\subsection{Literals}\label{sec:lib.literal}
+
+The literals are packed into a predicate to allow manipulations of literals at
+link time. Usually a literal is just left alone.
+The following sample implementations are provided with \ProCom.
+\begin{description}
+  \item [default/literal.pl]\ \\
+    This library performs nothing. It is just a dummy library to be
+    used if nothing else is desirable.
+  \item [eclipse/literal\_static.pl]\ \\
+    This library restricts the number of solutions of propositional goals to
+    one. The test for free variables is performed at compile time (link
+    time). Thus it may not detect goals which are propositional after some
+    variables have been bound at run time.
+  \item [eclipse/literal\_dynamic.pl]\ \\
+    This library restricts the number of solutions of propositional goals to
+    one. The test for free variables is performed at run time. Thus it may
+    cause some additional overhead.
+\end{description}
+
+The literal library has to provide the following predicate:
+\begin{description}
+  \item [literal\_wrapper({\em Literal}, {\em Varlist})]\index{literal\_wrapper}\ \\
+    {\em Literal}\/ is the goal representation of the literal to be
+    solved. {\em Varlist}\/ is the list of variables ocurring in the literal
+    at compile time.
+\end{description}
+
+
+\subsection{Timing}\label{sec:timing}
+
+The time library provides means to access and measure the time elapsed. Since
+the plain Prolog does not seem to have any means to perform this task it is
+highly dialect specific how this can be done.
+
+The following sample implementation is provided with \ProCom.
+\begin{description}
+  \item [eclipse/time.pl]\ 
+    \\
+    This library provides the predicates to manipulate the time for the
+    \eclipse{} system.
+  \item [eclipse/time.pl]\ 
+    \\
+    This library provides the dummy predicates for timing. Since there is no
+    standard for those predicates they are simply mapped to do nothing.
+\end{description}
+
+The following predicates are provided by the time library:
+
+\begin{description}
+  \item [set\_time]\index{set\_time}\ 
+    \\
+    This predicate is used to initialize the system timer.
+  \item [reset\_print\_time(File)]\index{reset\_print\_time}\ 
+    \\
+    This predicate is used to determine the ammount of time elapsed since the
+    last call to a timer routine. This time is printed to the standard output.
+    If {\em File} is an atom and not |[]| then the time is also appended to
+    this log file.
+  \item [set\_timeout({\em Limit})]\index{set\_timeout}\ 
+    \\
+    This predicate arranges things that the execution is interrupted after
+    {\em Limit} seconds. If the Prolog dialect has no such capability it
+    simply succeeds.
+  \item [reset\_timeout]\index{reset\_timeout}\ 
+    \\
+    This predicate stops the timeout timer or does nothing.
+\end{description}
+
+
+\subsection{Log Files and Proof Presentation}\label{lib:proof}
+
+The following sample implementation is provided with \ProCom.
+\begin{description}
+  \item [eclipse/proof.pl]\ 
+\end{description}
+
+\begin{description}
+  \item [save\_bindings({\em Index}, {\em Clause}, {\em Bindings}, {\em
+  File})]\index{save\_bindings}\ \\
+  This predicate writes the bindings to the log file {\em File}. If {\em
+  File} is the empty list |[]| or not an atom then this predicate simply
+  succeeds.
+
+  \item [save\_proof({\em Proof}, {\em File})]\index{save\_proof}\ \\
+  This predicate saves the proof term {\em Proof}\/ in the log file {\em
+  File}. If {\em File}\/ is the empty list |[]| or not an atom then this
+  predicate simply succeeds.
+
+  \item [show\_proof({\em Proof})]\index{show\_proof}\ \\
+  This predicate displays the proof term {\em Proof} on the standard output.
+\end{description}
+
+
+\paragraph{more.pl}\label{lib:more}
+
+\begin{description}
+  \item [more({\em Depth})]\ \\
+  This predicate queries the user to continue the search for a next solution
+  or to abort. {\em Depth}\/ contains the current depth limit or is an unbound
+  variable if no depth limit is used. This predicate succeeds iff {\em no}\/
+  more solutions are required.
+\end{description}
+
+
+\paragraph{show.pl}\label{lib:show}
+
+\begin{description}
+  \item [list\_bindings({\em GoalIndex},{\em GoalClause},{\em Bindings})]\ \\
+    This predicate is called after a solution has been found. It is meant to
+    present the solution.
+  \item [no\_more\_solutions]\ \\
+    This predicate is called when the search tree has been exhausted and no
+    more solutions can be found.
+  \item [no\_goal]\ \\
+    This predicate is called when no goal clause is left.
+\end{description}
+
+
+\paragraph{proof\_limit.pl}\label{lib:proof_limit}
+
+\begin{description}
+  \item [init\_proof\_limit]\index{init\_proof\_limit}\ \\
+  This predicate initializes the number of proofs already found to 0. This can
+  be done by asserting a fact to the Prolog data base or any other method
+  which allows the value to survive backtracking.
+
+  \item [check\_proof\_limit({\em Limit})]\index{check\_proof\_limit}\ \\
+  This predicate increments the number of proofs already found and compares it
+  with {\em Limit}. This predicate succeeds iff the number of proofs found is
+  greater or equal to the {\em Limit}.
+
+  \item [get\_proof\_limit({\em Limit})]\index{get\_proof\_limit}\ \\
+  This predicate unifies the number of proofs already found with {\em Limit}.
+\end{description}
+
+
+
+
+\subsection{The Search Libraries}\label{lib:search}
+
+
+\begin{description}
+  \item [set\_depth\_bound({\em Start}, {\em Factor}, {\em Const}, {\em
+  Depth})]\index{set\_depth\_bound}\ \\
+  This predicate 
+
+  \item [check\_depth\_bound({\em Depth}, {\em NewDepth}, \_,
+  \_)]\index{check\_depth\_bound}\ \\
+  This predicate 
+
+  \item [show\_depth({\em Depth})]\index{show\_depth}\ \\
+  This predicate 
+
+  \item [choose\_step({\em Step}, {\em Cand}, \_, \_)]\index{choose\_step}\ \\
+  This predicate 
+\end{description}
+
+
+\subsection{The Debugger}\label{sec:debugger}
+
+
+

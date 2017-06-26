@@ -1,0 +1,62 @@
+%%%****************************************************************************
+%%% $Id: search.tex,v 1.4 1995/01/16 21:03:12 gerd Exp $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%****************************************************************************
+
+%------------------------------------------------------------------------------
+\section{Implementing Search Strategies}
+
+
+The selection of the search strategy for \ProCom{} can be done with the option
+|search|. When  a  search strategy is   selected this way this  influences the
+execution  of  an initialization predicate.   This initialization predicate is
+called
+
+\Predicate init\_search/0().
+
+This predicate is used from the  module |p__|{\em search}\/ where {\em search}
+is the functor of the search strategy.
+
+Let us consider an example. Suppose the option |search| is
+|iterative_deepening(1,2,3)|.  This setting is evaluated at the time when
+\ProCom{} is compiling a matrix.  The functor of this option is
+|iterative_deepening|.  Thus the predicate |init_search/0| is called in the
+module with the prefix |p__| added, i.e.\ |p__iterative_deepening|.
+
+This predicate has reading and writing access to all options and some internal
+global variables which can be used to adjust the compilation process
+accordingly.
+
+\begin{description}
+\item [Hint:] Since the arity and the arguments of the option |search| are not
+  taken  into account in any way,  the search strategy can  use them for their
+  own purposes.  Especially a scheme can  be implemented to use default values
+  for  missing arguments,  or issue  an  warning message  when the appropriate
+  values are not given.
+\end{description}
+
+Each search strategy is declared with  the predicate |define_search/1| in {\sf
+  procom.cfg}. This  configuration  file is automatically  generated  from the
+{\sf Makefile}.
+
+A checklist for adding a new search strategy is given below.
+\begin{itemize}
+\item  Write   a   module  |p__|{\em search}     which exports  the  predicate
+  |init_search/0|. Place  this  module file  on  the  search  path  of Prolog.
+
+\item  Modify the variable |SUBDIRS| in {\sf Makefile}.
+
+\item Declare the search strategy in {\sf Makefile}. For this purpose the
+  value of the Makefile variable |PROCOM_SEARCH| must be adapted.
+
+\item Recompile the system.
+\end{itemize}

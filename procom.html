@@ -1,0 +1,100 @@
+<HEAD><TITLE>ProCom</TITLE></HEAD>
+
+<BODY>
+<I><A HREF="http://koralle.htwk-leipzig.de/welcome.html">Research Group Deduction at IMN/HTWK Leipzig</A></I><HR>
+
+<H1>ProCom/CaPrI and the Shell ProTop</H1>
+
+
+<H3>ProCom</H3>
+
+ProCom is a theorem prover written in <A
+HREF="http://www.icparc.ic.ac.uk/eclipse">ECLiPSe</A>
+Prolog. It is based on the PTTP paradigm.
+<P>
+
+ProCom is highly configurable. This means adaptability at
+various levels. ProCom has dozens of flags which influence its
+behaviour. The intermediate Prolog program which is generated to
+perform the proof task is made up of small pieces of Prolog
+code. Those pieces are collected in libraries and can be completely
+exchanged by the user.
+<P>
+
+To go further, even the inference rules to be used can be specified by
+the user. This can be done using the calculi programming interface CaPrI.
+
+
+<H3>CaPrI</H3>
+
+CaPrI is the Calculi Programming Interface of ProCom. This interface
+allows the user to program various calculi. Those high level
+descriptions of calculi are used to controll the translation in a
+PTTP-like mannor.
+
+
+<H3>ProTop</H3>
+
+ProTop is a shell for theorem provers. It provides means for the
+automation of experiments with internal and external theorem
+provers. Internal theorem provers are theorem provers written in
+Prolog which are loaded into the system and make use of the features
+of ProTop. External theorem provers are separate programs which are
+called by some interface modules from within ProTop.
+ <P>
+
+Currently the internal provers ProCom and Pool are part of thye
+distribution. The external provers <A
+HREF="http://www.mcs.anl.gov/summaries/otter93/otter93.html">Otter</A>
+and <A
+HREF="http://wwwjessen.informatik.tu-muenchen.de/forschung/reasoning/setheo.html">Setheo</A>
+are prepared to be used from within ProTop. Only the interface modules
+are included in the distribution.
+ <P>
+
+<H3>References</H3>
+<DL>
+<DT> <A
+HREF="http://koralle.htwk-leipzig.de/pub/TechReports/1994/specifications.dvi.gz">Gerd
+Neugebauer, Uwe Petermann: <I>Specifications
+of Inference Rules and Their Automatic Translation</I></A>
+<DD>
+This is a paper describing the calculi programming interface CaPrI. It
+has been presented at the <I>Workshop on Analytic Tableaux and related
+Methods, St. Goar 1995</I>.
+
+<DT> <A
+HREF="http://koralle.htwk-leipzig.de/pub/ProCom/manual.ps.gz">Gerd
+Neugebauer: <I>ProCom/CaPrI and the Shell ProTop. User's Guide</I></A>
+<DD>
+This is the draft version of the users manual. This is also contained
+in the distribution.
+
+<DT> <A
+HREF="http://koralle.htwk-leipzig.de/~gerd/Papers/lopstr95.dvi.gz">Gerd
+Neugebauer: <I>Reachability Analysis for a Certain Class of Calculi</I></A>
+<DD>
+Submitted to LOPSTR'95
+</DL>
+
+<H3>Getting ProCom</H3>
+
+You can get ProCom per ftp from <A
+HREF="http://koralle.htwk-leipzig.de/pub/ProCom/procom.tar.gz">koralle.htwk-leipzig.de:pub/ProCom/procom.tar.gz</A>.
+ <P>
+
+Unpack it with the command
+<LISTING>
+  gunzip &lt; procom.tar.gz | tar -xvf -
+</LISTING>
+This will create a directory ProCom. This directory contains the files
+README and INSTALL. Follow the instructions mentioned there to install
+the program.
+
+
+
+<HR><ADDRESS><A
+HREF="http://imn.htwk-leipzig.de/~uwe/mail.html">uwe@imn.htwk-leipzig.de</A>
+Fri Mar 30 09:51:42 MET DST 2001)</ADDRESS>
+
+</BODY>

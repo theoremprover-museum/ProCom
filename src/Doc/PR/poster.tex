@@ -1,0 +1,189 @@
+%******************************************************************************
+%* Author: Gerd Neugebauer   
+%******************************************************************************
+%* $Id:$
+%******************************************************************************
+
+\documentstyle[epic,eepic]{slide}
+\pagestyle{empty}
+
+\setlength{\textwidth}{162mm}    \setlength{\textheight}{230mm}
+\setlength{\parindent}{1Em}      \setlength{\parskip}{1ex}
+\setlength{\topmargin}{0mm}
+\setlength{\headheight}{3mm}     \setlength{\headsep}{8mm} 
+\setlength{\footskip}{10mm} 
+\setlength{\evensidemargin}{0mm} \setlength{\oddsidemargin}{0mm}
+
+\newfont\bfLO{ocmbx12 scaled \magstep5}
+
+\newsavebox\Sbox
+\sbox{\Sbox}{\input{capri10.epic}}
+\def\CPI{\usebox{\Sbox}}
+
+\newsavebox\SBOX
+\sbox{\SBOX}{\input{capri20.epic}}
+\def\CAPRI{\usebox{\SBOX}}
+
+\def\Head#1{\CPI\hfill{\bfLO #1}\hfill\CPI}
+\begin{document} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{Slide}
+  {\bf Reif f\"ur die Insel?}
+  \AD\AD
+  \makebox(0,0){\unitlength=1mm\circle{50}}
+  \makebox(0,0){%
+    \begin{minipage}{.4\textwidth}
+      \begin{center}
+	{\bfLO ProCom\\[1.2ex]CaPrI}    
+      \end{center}
+    \end{minipage}}
+  \AD\AD
+  {\Large\bf Calculi Programming Interface}
+  \rule{\textwidth}{2pt}
+  \input{lines.latex}
+  \vspace{-100pt}
+  \CAPRI\hfill\CAPRI
+
+\end{Slide}
+%------------------------------------------------------------------------------
+\begin{Slide}[\Head{ProCom}]
+  \large\bf
+
+  \SPACE
+  Prolog-Technologie-\"Ubersetzung
+  \SPACE
+  \begin{Itemize}[.6\textwidth]
+    \item auf Klauselebene
+    \item auf Prozedurebene
+    \item auf Goal-Ebene
+  \end{Itemize}
+
+  \SPACE
+\end{Slide}
+%------------------------------------------------------------------------------
+\begin{Slide}[\Head{Framework}]
+  \large\bf
+
+  \SPACE
+  Rahmen f\"ur Normalformbeweiser
+  \SPACE
+  \begin{Itemize}[.7\textwidth]
+    \item Parsing
+    \item Matrix-Management
+    \item Optionen-Verwaltung
+    \item Beweiser-Ansteuerung
+  \end{Itemize}
+
+  \SPACE
+\end{Slide}
+%------------------------------------------------------------------------------
+\begin{Slide}[\Head{CaPrI}]
+  \large\bf
+
+  \SPACE
+  Calculi Programming Interface
+  \SPACE
+  \begin{Itemize}[.6\textwidth]
+    \item Spezifikation der \"Ubersetzung
+    \item Anforderungen spezifizierbar
+    \item Interaktion mit ProCom
+  \end{Itemize}
+
+  \SPACE
+\end{Slide}
+%------------------------------------------------------------------------------
+\begin{Slide}[\Head{CaPrI --- Beispiel(1)}]
+  \large\bf
+
+  {\Large\bf Extensionsverfahren} (1)
+  \SPACE
+\begin{minipage}{.9\textwidth}
+\begin{verbatim}
+:- module(me1).
+:- compile(library(capri)).
+
+require_option(equality,[off]).
+
+descriptor
+    template(Pred,goal),
+    template(-Pred,
+             [path,extension]).
+\end{verbatim}
+\end{minipage}
+
+\end{Slide}
+%------------------------------------------------------------------------------
+\begin{Slide}[\Head{CaPrI --- Beispiel(2)}]
+  \large\bf
+
+\begin{minipage}{.9\textwidth}
+\begin{verbatim}
+:- module(me2).
+:- compile(library(capri)).
+
+require_option(equality,[off]).
+
+descriptor
+    proof(reduction(Pred)),
+    template(Pred,goal),
+    template(-Pred,path).
+
+descriptor
+    proof(extension(-Pred)),
+    template(Pred,goal),
+    template(-Pred,extension).
+\end{verbatim}
+\end{minipage}
+
+\end{Slide}
+%------------------------------------------------------------------------------
+\begin{Slide}[\Head{CaPrI --- Beispiel(3)}]
+  \large\bf
+  \SPACE
+\begin{minipage}{\textwidth}
+\begin{verbatim}
+:- module(me3).
+:- compile(library(capri)).
+
+require_option(equality,[off]).
+force_option(
+    'ProCom:automatic_put_on_path',
+    [off]).
+
+descriptor
+    proof(reduction(Pred)),
+    template(Pred,goal),
+    template(-Pred,path).
+
+descriptor
+    proof(extension(-Pred)),
+    template(Pred,goal),
+    put_on_path(Pred),
+    template(-Pred,extension).
+\end{verbatim}
+\end{minipage}
+
+\end{Slide}
+%------------------------------------------------------------------------------
+\begin{Slide}[\Head{CaPrI}]
+  \large\bf
+
+  \SPACE
+  Kalk\"ule
+  \SPACE
+  \begin{Itemize}[.8\textwidth]
+    \item Extensionsverfahren
+    \item --- mit Paramodulation
+    \item --- mit S-Modifikation
+    \item --- mit E-Modifikation
+    \item Restart-ME mit rigid-E
+  \end{Itemize}
+
+  \SPACE
+\end{Slide}
+%------------------------------------------------------------------------------
+
+
+
+\end{document} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

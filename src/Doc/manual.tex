@@ -1,0 +1,206 @@
+%%%****************************************************************************
+%%% $Id: manual.tex,v 1.8 1995/04/24 21:29:11 gerd Exp $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%****************************************************************************
+\def\RCSrevision{\RCSstrip$Revision: 1.8 $}
+\def\RCSdate{\RCSstrip$Date: 1995/04/24 21:29:11 $}
+
+\documentstyle [11pt,%.......... 
+                dina4,%......... use european A4 size paper
+                fleqn,%......... smash mathematics leftward
+                fancybox,%...... 
+                floatfig,%...... floating text around figures
+                psfig,%......... 
+                verbatim,%...... use input of files
+                pcode,%......... obviously Prolog code
+                gntitle,%....... 
+                old-fonts,%..... compatibility pack for xfig figures
+                makeidx,%....... yes, we are making an index
+                named,%......... 
+                rcs,%........... decode RCS information
+                psulhead,%...... use underlined heading
+                idtt,%.......... use | | for verbatim
+                epic%........... 
+                ]{book}%..... 
+\pagestyle{ulheadings}
+
+\setlength{\headheight}{3ex}
+\setlength{\parindent}{0Em}
+\setlength{\parskip}{1ex}
+
+\author{Gerd Neugebauer}
+\title{   \ProCom/CaPrI
+        \\and the Shell \ProTop}
+\subtitle{User's Guide}
+\version{\Version}
+\edition{\RCSrevision}
+\date{\today}
+\address{Fachbereich Informatik, Mathematik und Naturwissnschaft
+\\	 Hochschule f{\"u}r Technik, Wirtschaft und Kultur, Leipzig
+\\       Postfach 66
+\\       04251 Leipzig (Germany)
+\\       Net: {\small\tt gerd@imn.th-leipzig.de}
+}
+
+\WithUnderscore{\input{doc.cfg}}
+
+\newenvironment{Sample}{%
+        \begin{center}
+          \begin{minipage}{.5\textwidth}
+            \rule{\textwidth}{.1pt}\vspace{-1ex}%
+            }{%
+            \vspace{-2ex}\rule{\textwidth}{.1pt}
+          \end{minipage}
+        \end{center}%
+        }
+
+\let\PrologFILE=\relax
+\let\PredicateFileExtension=\relax
+
+\newcommand\eclipse{ECL\(^i\)PS\(^e\)}
+\newcommand\CaPrI{CaPrI}
+\newcommand\ProCom{ProCom}
+\newcommand\ProTop{{Pro\hspace{-.1em}Top}}
+
+\newfont\itt{cmitt10}
+
+\newenvironment{BoxedSample}%
+{\begin{Sbox} \begin{minipage}{.8\textwidth}\obeylines\obeyspaces\itt%
+}{%
+ \end{minipage} \end{Sbox}%
+ \begin{center}%
+  \cornersize*{3ex}%
+  \Ovalbox{\mbox{\TheSbox}}
+ \end{center}%
+}
+
+\renewcommand\textfraction{.1}
+\renewcommand\topfraction{1}
+\renewcommand\bottomfraction{1}
+
+\makeindex
+\begin{document} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\initfloatingfigs
+
+\maketitle
+Copyright {\copyright} 1995 Gerd Neugebauer\\[.5\baselineskip]
+{\small	Fachbereich Informatik, Mathematik und Naturwissnschaft
+\\	Hochschule f{\"u}r Technik, Wirtschaft und Kultur, Leipzig
+\\      Postfach 66
+\\      04251 Leipzig (Germany)
+\\      Net: {\tt gerd@imn.th-leipzig.de}
+}
+\vfill
+
+Permission is granted  to make and  distribute verbatim copies of  this manual
+provided the copyright notice and this permission  notice are preserved on all
+copies.
+
+%  Permission is  granted  to  process this file  through  TeX  and  print the
+%  results,  provided the printed document carries a copying permission notice
+%  identical  to  this  one  except for the  removal  of this paragraph  (this
+%  paragraph not being relevant to the printed manual).
+
+Permission is granted to copy and distribute  modified versions of this manual
+under the conditions for verbatim  copying, provided that the entire resulting
+derived work is distributed  under the terms of  a permission notice identical
+to this one.
+
+Permission is granted to copy and  distribute translations of this manual into
+another language, under  the  above conditions  for modified versions,  except
+that this permission  notice may be stated  in a  translation approved by  the
+author.
+
+
+\tableofcontents
+
+\part{\ProTop\ for Users}
+
+\chapter*{Introduction}
+\begin{floatingfigure}{.4\textwidth}
+  \begin{center}
+    \mbox{\psfig{file=overview.eps}}
+    \caption{Overview}\label{overview}
+  \end{center}
+\end{floatingfigure}
+
+\ProCom{} is a family of theorem provers which can be used out of the box as
+well as a test bed for developing own theorem provers. The techniques uses in
+\ProCom{} are close to PTTP-like theorem provers \cite{stickel:prolog}. We
+will not assume any knowledge on these techniques but it might help
+understanding some of the details.
+
+Implementing this paradigm means to translate a given problem into a Prolog
+program which behaves like a theorem prover. A overview of this idea can be
+seen in figure~\ref{overview}.
+
+The first phase of a proof attempt takes a problem --- typically in the
+language of first order logic --- and translates it into Prolog clauses. This
+task is performed by the \ProCom{} system. The result is a Prolog program.
+This Prolog program may contain specific constructs of the target Prolog
+dialect.\footnote{Currently only \eclipse\ and Quintus Prolog are supported.}
+
+Even so it is not necessary we will sketch the way \ProCom{} works.  After the
+problem has been read and stored in matrix form, a preprocessor is applied
+which performs several reductions. The reduced matrix is translated into
+Prolog code in four phases. One phase takes the clauses of the matrix,
+clusters them in procedures and generates code for those procedures. A second
+phase translates the set of goals. Goals deserve a special treatment which is
+different from usual procedures. A third phase is adds Prolog code from a
+library. The final phase consists of an optimizer which tries to remove
+redundancies from the generated Prolog code.
+
+Having in mind this scheme simply using \ProCom{} goes as follows. First, a
+problem is specified. This means it is written into a file in an extended
+Prolog notation. Another file containing various options to control the
+behavior of \ProCom{} may be used. Those input files are given to \ProCom.
+The result is a stand-alone Prolog program. This Prolog program can be
+executed.
+
+As a minimal result the answer {\tt yes} or {\tt no} is given (if any).
+Additional the presentation of a answer substitution or even a complete proof
+tree can be achieved.
+
+\ProTop\ is a shell which contains the functionality needed to run a theorem
+prover. Even so \ProTop\ has been developed in parallel to \ProCom\ it
+provides a more general environment. This is demonstrated by linking the
+theorem prover otter \cite{mccune:otter} to \ProTop.
+
+\input{protop}
+
+\input{syntax}
+
+\input{filters}
+
+\chapter{Using \ProCom}
+
+\input{options}
+\input{capri}
+
+\input{../Otter/otter.tex}
+\input{../Setheo/setheo.tex}
+
+\part{\ProTop\ for Programmers and Administrators}
+%\appendix
+\input{filter}
+
+\chapter{The Prolog Interface to \ProTop}
+\input{matrix}
+
+\input{install}
+
+\bibliographystyle{named}
+\bibliography{references}
+
+\WithUnderscore{\printindex}
+
+\end{document} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

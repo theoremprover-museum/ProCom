@@ -1,0 +1,49 @@
+%%%----------------------------------------------------------------------------
+%%% Title page layout.
+%%% Similar to the title page used by the GNU project
+%%%
+%%% 12/1993 Gerd Neugebauer
+%%% gerd@intellektik.informatik.th-darmstadt.de
+%%%
+%%%
+%%% Usage:
+%%%	\author{name of the author}
+%%%	\title{title of the document}
+%%%	\subtitle{subtitle of the document}
+%%%	\version{version of the thing described}
+%%%	\edition{version of the documentation}
+%%%	\date{date of the documentation}
+%%%	\address{address of the author(s)}
+%%%
+%%%	\maketitle
+%%%
+%%% 
+
+\def\@author{}		\def\author#1{\def\@author{#1}}
+\def\@address{}		\def\address#1{\def\@address{#1}}
+\def\@version{}		\def\version#1{\def\@version{#1}}
+\def\@edition{}		\def\edition#1{\def\@edition{#1}}
+\def\@title{}		\def\title#1{\def\@title{#1}}
+\def\@subtitle{}	\def\subtitle#1{\def\@subtitle{#1}}
+\def\@date{\today}	\def\date#1{\def\@date{#1}}
+
+\def\EditionText{Edition}
+\def\VersionText{Version}
+
+\def\maketitle{{\parindent=0pt%
+  \thispagestyle{empty}%
+  \null\vfill
+  \parbox[b]{.82\textwidth}{\raggedright\Huge\bf\@title}
+  \hfill\ifx\@version\empty\else{\normalsize\VersionText\ \@version}\fi
+  \\\rule{\textwidth}{2pt}
+  \\[2ex]\parbox[t]{.8\textwidth}{\raggedright\LARGE\bf\@subtitle}%
+  \hfill\parbox[t]{.2\textwidth}{\raggedleft\normalsize
+	\ifx\@edition\empty\else\EditionText\ \@edition\\\fi
+	\ifx\@date\empty\else \@date\fi}
+  \vfill\vfill\vfill
+  {\LARGE\sc\@author}
+  \\[-1ex]\rule{\textwidth}{.5pt}
+  {\normalsize\@address}
+\newpage
+}}
+

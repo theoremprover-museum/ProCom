@@ -1,0 +1,690 @@
+%%%****************************************************************************
+%%% $Id: options.tex,v 1.9 1995/07/03 11:35:12 gerd Exp gerd $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%****************************************************************************
+% Master File: manual.tex
+
+%------------------------------------------------------------------------------
+\section{Options of \ProCom}\label{sec:options}
+
+\ProCom{} can be adapted in it's behavior using a facility called options. A
+option corresponds to a register or variable in procedural programming
+language. Options of various kinds are used in \ProCom.
+
+In general options can take any Prolog terms as values. Nevertheless there are
+usually some kind of restrictions allowing only some kinds of values.
+
+The most common options are boolean options. Boolean options can take the
+values |on| and |off| only. In fact anything which is not |on| is interpreted
+as |off|.
+
+Another important type of option can take a file name. This is a Prolog string
+pointing to a file name.
+
+Options can be set in a options file which read at the beginning of any run of
+\ProCom. Usually this file is called {\sf .procom} and is searched in the
+current directory and the home directory in this order.
+
+The \ProCom{} options file can contain instructions set options only.
+This can be done using instructions of the following form:
+
+|  |{\em Option}| = |{\em Value}|.|
+
+In this instruction {\em Option}\/ denotes the name of an option and {\em
+Value}\/ is it's value. Note that {\em Value} has to conform t Prolog
+conventions and the terminating point is not optional! Possible options are
+described below.
+
+
+\subsection{General Options}
+
+\begin{description}
+  \item [prover] | = procom(extension_procedure)|\label{opt:prover}\\
+	This option indicates the prover which has to be activated. The
+	framework of \ProCom{} allows arbitrary provers to be integrated. For
+	our purpose we describe only the interface to the provers provided
+	with \ProCom{} and the interface to user defined provers.
+	
+	In this special case the value of this option is a Prolog term
+	of the form |procom(|{\em Name}|)| where {\em Name}\/ is the
+	name of a prover specified in the file {\sf procom\_config.pl}
+	(see page \pageref{procom.config}).
+
+  \item [search] | = iterative_deepening(1,1,1)|\\
+	This option indicates which search strategy should be used.
+	\begin{description}
+	  \item [depth\_first]\ \\
+		This search strategy uses the unbound depth first search like
+		Prolog provides it.
+	  \item [iterative\_deepening($\delta_0$, $\alpha$, $\beta$)]\ \\
+		This search strategy successively increments a depth bound.
+		The search space is searched to this limit. The limit is
+		incremented upon failure.
+		\\
+		The initial depth $d_0$\/ is $\delta_0$.
+		The next depth $d_{n+1}$\/ is computed from the previous depth
+		$d_n$\/ according to the formula
+		\[ d_{n+1} = \alpha\cdot d_n + \beta
+		\]
+		If $\alpha$\/ is $1$\/ then a linear function is achieved. If
+		$\alpha$\/ is greater then $1$\/ then an exponential function
+		can be forced.
+	  \item [iterative\_deepening($\delta_0$, $\beta$)]\ \\
+	        This is the same as 
+		iterative\_deepening($\delta_0$, 1, $\beta$).
+	  \item [iterative\_deepening($\delta_0$)]\ \\
+	        This is the same as iterative\_deepening($\delta_0$, 1, 1).
+	  \item [iterative\_deepening]\ \\
+	        This is the same as iterative\_deepening(1, 1, 1).
+	  \item [iterative\_inferences($\delta_0$, $\alpha$, $\beta$)]
+	        This search strategy successively increments a inference bound.
+		The search space is searched to this limit. The limit is
+		incremented upon failure.
+		\\
+		The initial depth $d_0$\/ is $\delta_0$.
+		The next depth $d_{n+1}$\/ is computed from the previous depth
+		$d_n$\/ according to the formula
+		\[ d_{n+1} = \alpha\cdot d_n + \beta
+		\]
+		If $\alpha$\/ is $1$\/ then a linear function is achieved. If
+		$\alpha$\/ is greater then $1$\/ then an exponential function
+		can be forced.
+	  \item [iterative\_inferences($\delta_0$, $\beta$)]\ \\
+	        This is the same as 
+		iterative\_inferences($\delta_0$, 1, $\beta$).
+	  \item [iterative\_inferences($\delta_0$)]\ \\
+	        This is the same as iterative\_inferences($\delta_0$, 1, 1).
+	  \item [iterative\_inferences]\ \\
+	        This is the same as iterative\_inferences(1, 1, 1).
+	  \item [iterative\_widening(a,b,c)]\ \\
+		This is an experimental mode implementing iterative widening
+		according to \cite{ginsberg.harvey:iterative}.
+
+		{\bf Not ready yet!}
+	  \item [iterative\_broadening(a,b,c)]\ \\
+		This is an experimental mode implementing iterative
+		broadening. 
+	\end{description}
+
+  \item [prolog] | = eclipse|\label{opt:prolog}\\
+	This option indicates the target language which should be
+	generated by \ProCom. Currently only a few possibilities are
+	supported. The value |eclipse| indicates that \eclipse{} is
+	the target language.  |quintus| stands for Quintus
+	Prolog. Finally, |default| generates code in standart prolog,
+	i.e.\ without special features of any Prolog dialect. In this
+	mode several other options may have no effect and the
+	resulting code may not be as efficient as in the specific
+	modes.
+
+  \item [input\_path] | = ['Samples']|\\
+	This option contains a list of directories which are used to find an
+	input file. This search path is used {\em after} the given file name
+	has been tried as is. Thus the current directory (|.|) need not to be
+	on this path.
+
+  \item [verbose] | = on|\\
+	This option turns on general verbosity of actions. Several modules may
+	decide to use their own verbosity options.
+
+  \item [toplevel:verbose] | = on|\\
+	This option controlls the verbosity of the top level.
+
+
+  \item [input\_filter] | = ''|\label{opt:input_filter}\\
+	Filter to be used before the clauses are read. E.g. this filter can
+	perform a normal form transformation. Filters may to be defined in
+	{\sf config.pl} to be accessible. Otherwise they are dynamically
+        loaded. In this case the file containing the filter has to be found on
+        the search path for Prolog files.
+
+	The value of this option can also be a list of filters. In this case
+	each filter is used in turn. The output of the preceeding filter is
+	given as input to the current filter. The initial filter gets the
+	input file as input. The result is the result of the last filter.
+
+        If only one filter is specified then the list can be omitted. I.e. a
+        symbol or string value of this option is interpreted as a filter to be
+        used.
+
+	Non-existing filters are ignored.
+
+	Let us consider an (imaginary) example:
+
+\begin{BoxedSample}
+  input\_filter = [nf\_transform,reductions1,reductions2]
+\end{BoxedSample}
+
+\end{description}
+
+\subsection{Options Controlling the Prove Phases}
+
+The prover can roughly be divided into two phases. The first phase is called
+the preprocessing phase. In this phase several redution techniques can be
+applied to reduce the size or complexity of the problem. The second phase is
+the theorem prover itself. According to this overall distinction there are
+some options controlling the general behaviour.
+
+\begin{description}
+\item [prove:red\_goals] |= [complete_goals,connection_graph]|\\
+  This option is a list of modules which are invoked in turn to perform their
+  tasks during the preprocessing phase. The elements of this list are
+  reduction modules. Those modules are either preloaded or they are
+  dynamically loaded.
+  
+\item [prove:red\_path] |= ['.']|\\
+  This option contains the path for the dynamic loading of reduction
+  modules. During the installation this path is augmented by the directory
+  containing \ProTop{} and its files.
+
+\item [prove:path] |= ['.']|\\
+  This option contains the path for the dynamic loading of prover modules.
+  The prover to be used is determined by the option |prover|.
+
+  During the installation this path is augmented by the directory containing
+  \ProTop{} and its files.
+
+\item [prove:extension] |= ['','.pl']|\\
+  This option contains a list of extensions used to find a reduction or a
+  prover module. The strings or symbols contained in this list are appended to
+  the file name before the existence of such a file is checked.
+
+\item [prove:log\_items] |= [prover,matrix,contrapositives]|\\
+  This option determines which information is written to the log file just
+  after the first phase of the proving, i.e. the preprocessing. The value
+  consists of a list of keywords as described below.
+
+  \begin{description}
+  \item[contrapositives]\ \\
+    The list of contrapositives is written to the log file. The
+    contrapositives are enclosed in |begin(contrapositives)| and
+    |end(contrapositives)|. This environment contains log terms of the
+    type |contrapositive/3|. The first argument is the head of the
+    contrapositive. The second argument is the body, i.e. the list of literals
+    without the head. The third argument contains the index of the
+    contrapositive. 
+
+    It is highly recommended to leave this item in the list |prove:log_items|
+    since some postprocessing programs rely on it.
+  \item[date]\ \\
+    The current date is written to the log file. The date is stored in the log
+    term |date/1|. The argument is a string containing the date in the format
+    as given by the command |date/1|.
+  \item[host]\ \\
+    The host information is written to the log file. The host information is
+    stored in the log term |host_info/2|. The first argument contains the
+    hostname. The second argument contains the host architecture.
+  \item[matrix]\ \\
+    The list of clauses is written to the log file. The clauses are enclosed
+    in |begin(matrix)| and |end(matrix)|. This environment contains log terms
+    of the following types:
+    \begin{description}
+    \item[GoalClause/1] contains the indices of the goal clauses.
+    \item[Label/2] contains the labels of the clauses. The first argument is a
+      clause index and the second argument is its label.
+    \item[Clause/2] contains the  clauses. The first argument is the index of
+      this clause. The second argument is the list of literals. Each literal
+      is of the form |literal(|$L$|,|$I$|)| where $L$\/ is a signed predicate
+      and $I$\/ is its index.
+    \end{description}
+
+    It is highly recommended to leave this item in the list |prove:log_items|
+    since some postprocessing programs rely on it.
+  \item[options]\ \\
+    The complete list of options and their values is written to the log file.
+  \item[prover]\ \\
+    The prover to be used is written to the log file. This information could
+    also be extracted from the options, but sometimes this is the only option
+    we are interested in.
+
+    The prover name is stored in the log term |prover/1|.
+  \item[user]\ \\
+    The name of the user is written to the log file. The user information is
+    stored in the log term |user/2|. The first argument is the login name of
+    the user and the second name is the full name of the user as given in the
+    GCOS field of the passwd file.
+  \end{description}
+
+\end{description}
+
+\subsubsection{Options of the Reduction Module {\tt complete\_goals}}
+
+\begin{description}
+
+  \item [complete\_goals] | = on|\\
+  If this option is turned on then the matrix is checked to contain a
+  complete set of goals. If the set of goals is not complete then it is
+  completed.
+
+\end{description}
+
+\subsubsection{Options of the Reduction Module {\tt connection\_graph}}
+
+\begin{description}
+
+  \item [find\_connections] | = on|\\
+  This option can be used to suppress the generation of the reachability
+  graph. \ProCom{} does not assume that this option is turned off. The
+  result is unpredictable in this case.
+
+  \item [find\_all\_connections] | = off|\\
+  If this option is on then all literal are initially considered when
+  constructing the reachability graph. Otherwise only literals in goal
+  clauses are considered.
+
+  \item [connect\_weak\_unifiable] | = on|\\
+  One of two methods to compute the reachability graph can be selected.  The
+  first method is to connect complementary literal which are weak
+  unifyalbe. The alternative is to consider the predicate symbol only.
+
+  \item [remove\_unreached\_clauses] | = on|\\
+  If this option is on then each unreached clause is removed after the
+  reachability graph has been constructed.
+
+\end{description}
+
+
+\subsection{Automatic Options}
+
+This section contains options which are automatically set. They can be checked
+but should not be altered in any way.
+
+\begin{description}
+  \item [equality] | = off|\\
+  This boolean option is set when an equality predicate (|=/2|) is detected
+  in the input problem.
+
+  \item [setvar] | = off|\\
+  This boolean option is set when an set variable (|:/2|) is detected in the
+  input problem.
+
+  \item [input\_file] | = ''|\\
+  This option is automatically set to the current input file name as given
+  by the user, i.e. without the automatically appended directory from the
+  search path.
+
+  \item [output\_file] | = ''|\\
+  This option is set to the output file name as given by the user.
+
+  \item [interactive] | = off|\\
+  This option is set when the output is not redirected to a file. Thus an
+  interactive prover can act accordingly.
+
+\end{description}
+
+
+
+\subsection{\ProCom\ General Options}
+
+\begin{description}
+
+  \item ['ProCom:dynamic\_reordering'] | = on|
+
+  \item ['ProCom:ancestor\_pruning'] | = on|
+    \\
+    This option enables generation of code performing identical ancestor
+    pruning. This means that a branch of the search tree is cut if two
+    identical subgoals have been encountered. Only a minor variant may be
+    implemented.
+
+  \item ['ProCom::ancestor\_pruning'] | = 'prune.pl'|
+    \\
+    This option specifies the library which provides the predicates to perform
+    the identical ancestor check.
+
+  \item ['ProCom:occurs\_check'] | = on|
+    \\
+    This option indicates wheter special care should be taken to perform sound
+    unification. In this case special caution is taken at the clause level.
+    Another variant might be to enable the occurs check globally --- if this
+    feature is provided by the Prolog dialect used.
+
+  \item ['ProCom::unify'] | = 'unify.pl'|
+    \\
+    This option specifies which library should be used to get the predicate
+    |unify/2| which performs sound unification. This library is used if the
+    option  |ProCom:occurs_check| is |on|.
+
+  \item ['ProCom::unify\_simple'] | = 'unify-no-oc.pl'|
+    \\
+    This option specifies which library should be used to get the predicate
+    |unify/2| which performs unification. This library is used if the option
+    |ProCom:occurs_check| is |off|.
+
+  \item ['ProCom::member'] | = 'member.pl'|
+    \\
+    This option specifies which library should be used to get the predicate
+    |member/2| which is a sound member predicate. Ususally this library will
+    in turn use the library predicate |unify/2|. Thus the value of the option
+    |ProCom:occurs_check| is taken into account.
+
+  \item ['ProCom:literal\_selection'] | = deterministic|
+    \\
+    This option determines the strategy for literal selection. It can take the
+    values |deterministic| or |random|\footnote{Currently not supported.}.
+
+  \item ['ProCom:path'] | = path.pl|\label{opt:ProCom:path}
+    \\
+    This option determines the library containing the path managment
+    predicates.  See section \ref{sec:lib.path} for details.
+
+  \item ['ProCom::lemma'] | = 'no-lemma.pl'|
+    \\
+    This option specifies the library containing the lemma handling
+    predicates.  The standard libraries contain also the library |lemma.pl|
+    which is recommended as a basis for your own lemma handling routines.
+
+  \item ['ProCom:lemma'] | = off|
+    \\
+    This option can be used to suppress the compiling of the calles to
+    |lemma/3| which are defined in the lemma library.
+
+  \item ['ProCom:automatic\_put\_on\_path] | = on |
+    \\
+    This option can be used to suppress the automatic addition of a goal to
+    the current path. If youturn this option off you might want to use the
+    primitive |put_on_path| in your descriptor to put some liteals on the
+    path.
+
+  \item ['ProCom:add\_contrapositives'] | = off|
+    \\
+    This option enables the generations of contrapositives in the target
+    program. In this case the facts |contrapositive/3| are defined.
+
+    The contrapositives may be needed by heuristic functions, e.g. for literal
+    selection, which want to inspect the whole problem.
+
+  \item ['ProCom:proof\_limit'] | = off|
+    \\
+  This option can be used to specify the way to proceed after a proof has been
+  found and presented. The following values are currently supported:
+  \begin{description}
+    \item [interactive]\ 
+      \\
+      This value forces the generation of code to query the user. This is
+      similar to the top level loop of Prolog. The library |ProCom::more| (see
+      section \ref{lib:more}) is used in this case.
+    \item [all]\ 
+      \\
+      This value forces the search for further solutions.
+    \item [{\em number}]\ 
+      \\
+      Any natural number forces the search for further solutions until this
+      number of solutions are found or all solutions are exhausted. The
+      library specified by the option |ProCom::proof_limit| (see section
+      \ref{lib:proof_limit}) is used in this case.
+  \end{description}
+
+  Any other value will force the termination after the first solution.
+
+\end{description}
+
+\subsection{\ProCom\ Goal Compiler Options}
+
+
+\begin{description}
+  \item ['ProCom:post\_goal\_list'] | = []|
+    \\
+    This option specifies a list of Prolog predictes which are called after
+    the proof of a goal has been successful. As additional arguments the list
+    of variable bindings and the proof tree is added to the predicate given.
+
+    Consider the |ProCom:post_goal_list| containing the element |pgl(1,47)|.
+    Then the goal |pgl(1,47,Vars,Proof)| is compiled into the prover, where
+    |Vars| and |Proof| are instantiated to the variable bindings and the proof
+    tree respectively.
+
+    Note that you have to ensure that the predicates given are present in the
+    compiled Prolog program. This can be done by specifying appropriate
+    libraries containing the Prolog code.
+
+  \item ['ProCom:init\_goal\_list'] | = []|
+    \\
+    This option specifies a list of Prolog predicates which are called when a
+    goal is launched.
+
+    Note that you have to ensure that the predicates given are present in the
+    compiled Prolog program. This can be done by specifying appropriate
+    libraries containing the Prolog code.
+
+  \item ['ProCom:init\_level\_list'] | = []|
+    \\
+    This predicate specifies a list of predicates which are called whenever a
+    new depth level is started, i.e. right after |set_depth_bound/1| has
+    returned a new depth. The depth is added as additional argument to the
+    predicates given.
+
+    Note that you have to ensure that the predicates given are present in the
+    compiled Prolog program. This can be done by specifying appropriate
+    libraries containing the Prolog code.
+
+\end{description}
+
+See also the section on reordering (\ref{procom:reordering}) for further
+options to influence the goal compilation.
+
+
+
+\subsection{\ProCom\ Linker and Optimizer Options}
+
+The options described in this section influence the behaviour of the linker.
+The linker is the last step in the program generation process. Several tasks
+are performed here. The main task is to add missing predicates from the
+libraries. For this purpose possible libraries have to be named.
+
+Another task perform in this last step is the application of certain
+optimizations. The optimizations are mainly unfolding for Prolog predicates
+for efficiency. These optimizations drastically reduce the readability of the
+generated code. Thus it is recommened to turn them of when first trying to
+understand the generated Prolog program.
+
+\begin{description}
+
+\item ['ProCom:link'] | = static|\\ 	This option specifies the type of
+  linking. Possible values are
+  \begin{description}
+  \item [off]\ 
+    \\
+    This value disbales the linker. This is recommened for development
+    purposes only. In this case the generated code is not executable as is.
+  \item [static]\ 
+    \\
+    This is the usual way of linking. Any Prolog code from the libraries is
+    copied into the generated Prolog program. Thus the program can be run on
+    any appropriate Prolog system.
+  \item [dynamic]\ 
+    \\
+    If this variant is used then for most of the libraries only compile
+    instructions are generated in the target program. Thus this program is
+    only executable if the used libraries are still accessible under the names
+    given during linking.
+  \end{description}
+
+\item ['ProCom::link\_path']\label{opt:ProCom::link_path}\ 
+  \\
+  This option holds a list of directory names where the linker looks for
+  appropriate files. The value of the option |prolog| is appended to those
+  directories.
+
+\item ['ProCom:optimize'] | = on|
+  \\
+  The linker has built-in the ability to perform certain optimizations.  For
+  testing purposes it might be desirable to disable those optimizations.  In
+  general it is not recommended to turn them off.
+
+\item ['ProCom:expand'] | = on|\label{opt:ProCom:expand}
+  \\
+  This option enables the expansion (i.e. unfolding) of non-recursive
+  predicates from the libraries. In the libraries one can specify which
+  predicates should be considered (see section~\ref{sec:contents.library}).
+
+\item ['ProCom:expand\_aux'] | = on|
+  \\
+  This option enables the expansion (i.e. unfolding) of auxiliary predicates.
+
+\item ['ProCom:module'] | = off|
+  \\
+  This option enables the generation of code which encapsulates the prover in
+  a module. This is only possible if a module system is provided by the Prolog
+  dialect.
+
+\item ['ProCom::module'] | = 'module.pl'|
+  \\
+  This option specifies the library which contains the module head.
+
+\item ['ProCom::immediate\_link] | = ['init.pl']|%
+  \label{opt:ProCom::immediate_link}\\
+  This option specifies a list of libraries which are added to the code
+  at the beginning --- possibly right after the module initialization but
+  before anything else.
+
+\item ['ProCom::post\_link] | = []|
+  \\
+  This option specifies a list of libraries which are added to the code at the
+  end. This might be used to add libraries which are encapsulated in modules.
+
+\item ['ProCom:ignore\_link\_errors'] | = off|
+  \\
+  This option can be used to suppress the linker to abort because of missing
+  predicates. Usually the linker checks wether all predicates used are also
+  defined. Those checks can fail if the predicate is defined in a library file
+  or a module loaded with the |ProCom::post_link| option. Thus it can be
+  desirable to ignore the linker errors. Nevertheless the error messages are
+  displayed but ignored afterwards.
+\end{description}
+
+\subsection{\ProCom\ Information Controlling Options}
+
+Information about the proof and the proof process can be of intrest. Thus it
+is possible to enable the generation of such information. Since thiese
+additional operations cost some time they may be worth turning off, when a
+fast proof is required and the information is not essential.
+
+\begin{description}
+
+  \item ['ProCom:verbose'] | = off|
+    \\
+    This option enables the generation of various comments in the target
+    Prolog program. The generated code my be slightly more readable when this
+    option is on.
+
+  \item ['ProCom:proof'] | = on|
+    \\
+    This option enables the generation of code to collect the information
+    representing the proof tree. This takes some time and space and should be
+    turned off when a fast prover is required. If a proof tree is enabled the
+    predicates required are taken from the library given in the next option.
+
+  \item ['ProCom::proof'] | = 'proof.pl'|
+    \\
+    This option specifies the library which is used for proof tree generation
+    and display.
+
+  \item ['ProCom:trace'	] | = off|
+    \\
+    This option enables code generation for the built-in debugger. This
+    debugger can be used to trace the activities of the prover. (see
+    \ref{sec:debugger})
+
+  \item ['ProCom::trace'] | = 'debugger.pl'|
+    \\
+    This option specifies the library which contains the debugger.
+
+  \item ['ProCom:timing'] | = on|
+    \\
+    This option enables the generation of code to determine the run time of
+    the theorem prover. This is only possible in dialects which provide means
+    to acess the run time.
+
+  \item ['ProCom::timing'] | = 'time.pl'|
+    \\
+    This option specifies the library which contains code to set and query the
+    timer.
+
+  \item ['ProCom:show\_result'] | = on|
+    \\
+    This option enables the generation of code to display variable bindings
+    and allow the user to ask for additional solutions.
+
+  \item ['ProCom::show\_result'] | = 'show.pl'|
+    \\
+    This option specifies the library which contains code to display the goal
+    and variable bindings after a succesful proof attempt.
+
+\end{description}
+
+
+\subsection{\ProCom\ Reordering}\label{procom:reordering}
+
+\ProCom{} provides a powerful facility to reorder things before, during and
+after the compilation process. This is an addition to the reordering hooks
+provided in the preprocessing which are far less expressive.
+
+In contrast to the |reorder_literals|/|clauses| functions which are assumed to
+poke around in the Prolog database the \ProCom{} reordering facility provides
+an interface which allows the user to specify an order and leave the
+reordering to the system. This has the advantage that the user can do no harm
+to the data, i.e. alter or delete entities.
+
+The system performs the sorting using a user written comparison predicate. To
+allow several sets of comparison predicates to coexist those predicates are
+hidden in modules. The options specify the module name in which certain
+predicates are expected. If no reordering is wanted then the empty symbol |''|
+can be used instead.
+
+The predicates given should succeed if the first element is less or equal than
+the second element. These predicates should be deterministic.
+
+\begin{description}
+\iffalse
+  \item ['ProCom:reorder\_ext']             | = ''|
+    \\
+    This option provides the name of a module containing a predicate
+    |compare_ext/2|. This predicate is used to compare
+  \item ['ProCom:reorder\_goal']            | = ''|
+    \\
+    This option provides the name of a module containing a predicate
+    |compare_goal/2|. This predicate is used to compare
+\fi
+  \item ['ProCom:reorder\_clauses']         | = ''|
+    \\
+    This option provides the name of a module containing a predicate
+
+    |compare_clauses/2|
+
+    This predicate is used to compare clauses.
+  \item ['ProCom:reorder\_goal\_clauses']   | = ''|
+    \\
+    This option provides the name of a module containing a predicate
+
+    |compare_prolog_clauses/2|
+
+    This predicate is used to compare
+  \item ['ProCom:reorder\_prolog\_clauses'] | = ''|
+    \\
+    This option provides the name of a module containing a predicate
+
+    |compare_prolog_clauses/2|
+
+    This predicate is used to compare Prolog
+    clauses of a procedure just after they have been generated and before the
+    optimizer has done it's work. Depending on other options the clauses may
+    have different forms. E.g. auxiliary predicates may be expanded.
+  \item ['ProCom:reorder\_aux\_clauses']    | = ''|
+    \\
+    This option provides the name of a module containing a predicate
+
+    |compare_aux_clauses/2|
+
+    This predicate is used to compare auxiliary clauses.
+\end{description}
+

@@ -1,0 +1,89 @@
+%%*****************************************************************************
+%% $Id: nf-doc.tex,v 0.00 1995/03/31 12:01:47 gerd Exp $
+%%*****************************************************************************
+%% Author: Gerd Neugebauer
+%%-----------------------------------------------------------------------------
+\def\RCSrevision{\RCSstrip$Revision: 1.6 $}
+\def\RCSdate{\RCSstrip$Date: 1995/03/06 23:04:17 $}
+
+\documentstyle [fleqn,%............ smash mathematics leftward
+                fancybox,%......... 
+                psulhead,%......... use underlined heading
+                pcode,%............ obviously Prolog code
+                ../Doc/gntitle,%... my title layout
+                makeidx,%.......... yes, we are making an index
+                ../Doc/rcs,%....... decode RCS strings
+                idtt,%............. use | | for \verb
+                multicol,%......... 
+                dina4,%............ A4 sized paper
+                logic%............. my macros to typeset logic
+                ]{book}%........... This is some kind of a book
+\pagestyle{ulheadings}
+
+\headheight=8mm
+\parindent=0pt
+
+%------------------------------------------------------------------------------
+\vbadness=10000 %%%%%% I don't want to hear about underfull vboxes
+%------------------------------------------------------------------------------
+\newcommand\ProTop{ProTop}
+\newcommand\ProCom{ProCom}
+\newcommand\CaPrI{CaPrI}
+\newcommand\eclipse{ECL$^i$PS$^e$}
+%------------------------------------------------------------------------------
+\newfont\sfi{cmssi10}
+\def\FileId#1#2{{\small\it This is revision #2 of {\sfi \PrologFILE{}} written
+    by #1.}\bigskip}
+%------------------------------------------------------------------------------
+\renewcommand\PredicateBoxRule{1pt}     
+\renewcommand\PrologRuleWidth{.2pt}
+\PrologNumberLinestrue
+
+\renewcommand\PrologModule[2]{%
+        \newpage%
+        \markboth{The Module {\tt #1}}{The Module {\tt #1}}
+        \section{The Module {\tt #1}}}
+
+\renewcommand\PrologFile[2]{}
+
+\newfont\Pfont{cmitt10 scaled 900}
+\def\PrologFont{\Pfont}
+
+\def\PredicateIndex#1{\index{#1@{\tt #1}}}
+
+\PrologDialect{eclipse}
+%------------------------------------------------------------------------------
+\newenvironment{SampleCode}[1]{\begin{center}%
+  \begin{minipage}{#1}\xdef\WD{#1}%
+    \footnotesize\rule{\WD}{.1pt}\vspace{-\baselineskip}
+}{\vspace{-\baselineskip}\rule{\WD}{.1pt}\end{minipage}\end{center}}
+
+\newfont\itt{cmitt10}
+%------------------------------------------------------------------------------
+\newenvironment{BoxedSample}%
+{\begin{Sbox}\begin{minipage}{.8\textwidth}\obeylines\obeyspaces\itt%
+}{%
+ \end{minipage}\end{Sbox}%
+ \begin{center}%
+  \cornersize*{3ex}%
+  \Ovalbox{\mbox{\TheSbox}}
+ \end{center}%
+}
+
+\begin{document}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\PrologInput{nf.pl}
+\PrologInput{nf_intern.pl}
+\PrologInput{nf_normal.pl}
+\PrologInput{nf_neg_in.pl}
+\PrologInput{nf_closure.pl}
+\PrologInput{nf_skolem.pl}
+\PrologInput{nf_anti_prenexing.pl}
+\PrologInput{nf_flatten.pl}
+
+\end{document}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Local Variables: 
+% mode: latex
+% TeX-master: nil
+% End: 

@@ -1,0 +1,569 @@
+%%*****************************************************************************
+%% $Id: matrix.tex,v 1.7 1995/04/24 21:29:11 gerd Exp $
+%%*****************************************************************************
+%% Author: Gerd Neugebauer
+%%-----------------------------------------------------------------------------
+
+\section{The Library Matrix}
+\def\PrologFILE{System/matrix.pl}
+
+The matrix, which is read and processed with filters, is parsed and stored in
+the module {\sf matrix}. The internal organization of this module should not
+be relevant for all applications using it. In fact the module {\sf matrix} has
+gone through several incarnations where the data has been stored in the Prolog
+data base (assert), the indexed data base (record), and the \eclipse{} global
+variables. Anybody using the interface predicates only will not even recognize
+if a new version is installed --- except for different execution times.
+
+
+Inside a Prolog program running under the control of \ProTop, it is
+sufficient to request the interface with
+\begin{BoxedSample}
+  :- lib(matrix).
+\end{BoxedSample}
+It might also turn out as useful to use the library {\sf literal} as well.
+
+The library {\sf matrix} uses hooks wherever possible to allow the user to
+perform actions whenever the matrix is changed. The concept and use of hooks
+is described in the documentation of the library {\sf hooks}. The hooks are
+meant as a means to store additional information in other modules. For other
+purposes they may not turn out as appropriate.
+
+The predicates provided by the library {\sf matrix} can be categorized as
+follows. Primarily there are predicates to access the information about the
+matrix. Additionally there are predicates to add further information to the
+matrix or to remove it. Finally printing routines for the matrix are provided.
+
+\subsection{The Data Structures}\label{matrix:data.structures}
+
+The module {\sf matrix} is able to store a single matrix in clause normal
+form. Since we are not interested in manipulating more than one matrix of
+treat the matrix as a object of its own we have no explicit data structure for
+a matrix. Instead we manipulate clauses and literals.
+
+
+As an illustrative example in the remainder of this section we will use the
+following matrix.
+\begin{BoxedSample}
+       [p(X), -q(f(X),g(X))].
+base:: [q(a,X)].
+loop:: [q(X,Y), -q(f(X),Y)].
+?-     [-p(Z)].
+\end{BoxedSample}
+This matrix is presented in its external representation. Two clauses have labels
+assigned to them and one clause is marked as a goal. For convenience it is
+possible to write the negation sign as |-| and to omit the positive sign at all.
+Internally we use a more strict regime. The central naming conventions for the
+data structures used are discussed next.
+
+\begin{description}
+\item[Literal] \ \\
+  A literal is a Prolog term of the form |++|{\em Predicate}\/ or |--|{\em
+    Predicate}. From our example we can consider the literals in external
+  representation |q(a,X)| and |-q(f(X),Y)|. The internal representation would
+  be the following two literals
+\begin{BoxedSample}
+    ++q(a,X)
+    --q(f(X),Y)
+\end{BoxedSample}
+
+\item[Index]\ \\
+  Any literal is uniquely identified by an index. This index is assigned to
+  the literals when the clauses or contrapositives are added to the matrix.
+  Predicates are provided to manipulate the literal index. Use those
+  predicates and do not assume anything about the index except that it
+  uniquely points to a literal.
+
+  At the time this is written the index is of the form {\em C|-|L}, where
+  {\em C}\/ is a number pointing to the clause and {\em L}\/ is a literal
+  pointing to the literal in this clause. When you are reading this, the
+  internal representation of an index may have changed already. For reasons of
+  efficiency, atoms instead of compound terms may be used as indices.
+  
+  {\large\bf Attention:} Do {\em not}\/ assume that the index is constructed in
+  a special way, i.e. to be of the form {\em C|-|L}. Do {\em not}\/ assume
+  that {\em C}\/ or {\em L}\/ are numbers!
+
+\item[Clause Index]\ \\
+  A clause index is a unique identifier for a clause. Several predicates are
+  provided which take a clause index as argument. Especially one predicate is
+  provided to get the clause index from an index.
+
+  Currently the clause index is a number. This may change soon.
+
+  {\large\bf Attention:} Do {\em not}\/ assume that the clause index is a
+  number!
+
+\item[Contrapositive]\ \\
+  A clause can be accessed through the various literals contained in it. This
+  leads to the concept of a contrapositive. A contrapositive is a set of
+  literals which (normally) corresponds to the literals of a clause where one
+  literal is distinguished. This literal is called ``entry point''. A literal
+  can be described by the sign and predicate or by its unique index. Thus a
+  contrapositive relates a literal and its index to the remaining set of
+  literals.
+
+  For some purposes it seemed to be desirable to manipulate various
+  contrapositives of a clause in different ways. One application are Horn
+  problems where at most one contrapositive of every clause is needed. For the
+  goal no contrapositive is needed at all. Nevertheless the prover has to
+  start the prove process and thus it has to get the goal clause.
+
+\item[Clause]\ \\
+  A clause is a set of literals. It is uniquely identified by a clause
+  index. The clause may have contrapositives assigned to it but this is not
+  neccesary. A clause can exist without having any contrapositives.
+
+\item[Connection]\ \\
+  Two literals or contrapositives can be related when they are potentially
+  conplementary. This relation is also managed in the module {\sf matrix}. The
+  relation itself has to be specified externally. The only property maintained
+  in this module is that connections can only exist between literals present
+  in it.
+
+  Note that the connections managed by this module are directed connections.
+\end{description}
+
+
+
+\subsection{Accessing the Matrix}
+
+\Predicate Contrapositive/3(?Literal, ?Body, ?Index).
+
+This predicate can be used to get the complete information about a
+contrapositive in the matrix.\footnote{To be precise we have to note that
+  different entry points to a clause may keep different information.} This
+predicate assumes that either the index |Index| is ground or the literal
+|Literal| is sufficiently instantiated. In the first case at most one solution
+is returned. In the second case all solutions are returned upon backtracking.
+If neither the literal nor the index is given all contrapositives are
+enumerated. This is the worst case and should be avoided.
+
+|Literal| is unified with a literal (in internal representation; see
+\ref{matrix:data.structures}). |Index| is a literal index. |Body| is a list
+containing elements of the form {\em literal(L,I)}\/ where {\em L}\/ is a
+literal and {\em I}\/ is an index. |Body| contains all literals which are in
+the contrapositive of |Literal| except |Literal| itself. The complete clause
+represented by this contrapositive would be
+\begin{BoxedSample}
+  [ literal(Literal,Index) \char"7C Body ]
+\end{BoxedSample}
+
+
+Let us assume that the matrix given earlier is stored in the module {\sf
+  matrix}. Then we can access it as shown in the next example.
+\begin{BoxedSample}
+  ?- 'Contrapositive'(q(A,B),Body,Index).
+  A = a
+  B = X
+  Body = []
+  Index = 2-1
+  ;
+  A = X
+  B = Y
+  Body = [literal(--q(f(X),Y),3-2)]
+  Index = 3-1
+  ;
+  No more solution
+\end{BoxedSample}
+
+
+\Predicate PositiveClause/1(?ClauseIndex).
+
+This predicate unifies the clause index |ClauseIndex| with those clauses which
+contain positive clauses only. All literals currently
+in the clause are considered. Even so a single contrapositive may or may not be positive the
+whole clause can have an independent property.
+\begin{BoxedSample}
+  ?- 'PositiveClause'(CI).
+  CI = 2
+\end{BoxedSample}
+
+\Predicate NegativeClause/1(?ClauseIndex).
+
+This predicate unifies the clause index |ClauseIndex| with those clauses which
+contain negative clauses only. All literals are considered which are currently
+in the clause. Even so a single contrapositive may or may not be negative the
+whole clause can have an independent property.
+\begin{BoxedSample}
+  ?- 'NegativeClause'(CI).
+  CI = 4
+\end{BoxedSample}
+
+\Predicate ClauseLength/2(?ClauseIndex,?Length).
+
+This predicate enumerates all pairs of clause indices |ClauseIndex| and the
+length |Length| of the clause belonging to |ClauseIndex|. This information is
+extracted for the complete clause. Single contrapositives may have a different
+length.
+
+\begin{BoxedSample}
+  ?- 'ClauseLength(1-1,Len).
+  Len = 2
+\end{BoxedSample}
+
+
+\Predicate Clause/1(?ClauseIndex).
+
+This predicate unifies |ClauseIndex| with each index of a clause currently
+stored in the module matrix in turn.
+\begin{BoxedSample}
+  ?- findall( CI, 'Clause'(CI), ClauseList ).
+  ClauseList = [1,2,3,4]
+\end{BoxedSample}
+
+\Predicate Clause/2(?ClauseIndex, ?Body).
+
+This predicate takes a clause index |ClauseIndex| and unifies |Body| with a
+list of the form {\em literal(L,I)}\/ where {\em L}\/ is a literal and {\em
+  I}\/ is an index. Body contains all literals left in the specified clause.
+
+The literals in the clause are not modified when a single contrapositive is
+changed. Only the deletion of a literal in a clause, building the resolvent,
+or deleting a complete clause may change the information returned by this
+predicate.
+
+Upon backtracking all unifiable pairs of clause index and literal list are
+returned.
+\begin{BoxedSample}
+  ?- 'Clause'(3,Body).
+  Body = [literal(++q(X,Y),3-1),literal(--q(f(X),Y),3-2)]
+\end{BoxedSample}
+
+\Predicate GoalClause/1(?ClauseIndex).
+
+This predicate unifies |ClauseIndex| with the index of each clause which is
+marked as goal. Several solutions can be returned upon backtracking.
+\begin{BoxedSample}
+  ?- findall( CI, 'GoalClause'(CI), ClauseList ).
+  ClauseList = [4]
+\end{BoxedSample}
+
+\Predicate Label/2(?ClauseIndex, ?Label).
+
+This predicate enumerates all pairs consisting of a clause index |ClauseIndex|
+and an associated label |Label|. Note that the goal label is a special kind of
+label which is not returned with this predicate.
+\begin{BoxedSample}
+  ?- 'Label'(CI,Label).
+  CI = 2
+  Label = base
+  ;
+  CI = 3
+  Label = loop
+  ;
+  No more solution
+\end{BoxedSample}
+
+\Predicate ClauseLiteral/2(?ClauseIndex, ?Index).
+
+This predicate establishes a relation between the clause and literal indices.
+It can be used to find one or all literals in a clause as well as to find the
+clause index of an index.
+
+\begin{BoxedSample}
+  ?- 'ClauseLiteral'(1,Index).
+  Index = 1-1
+  ;
+  Index = 1-2
+  ;
+  No more solution
+
+  ?- 'ClauseLiteral'(CI,3-2).
+  CI = 3
+\end{BoxedSample}
+
+
+\Predicate Connection/2(?FromIndex, ?ToIndex).
+
+This predicate relates the indices |FromIndex| and |ToIndex| according to the
+connectedness. The connection graph contains an arc from a literal $L$\/ to
+another literal $L'$\/ if an extension or reduction from $L$\/ to $L'$\/ can
+be part of the final proof. This information is provided by the module {\sf
+  connection\_graph}. 
+
+
+\Predicate new_clause_index/1(-ClauseIndex).
+
+This predicate unifies |ClauseIndex| with a unique new clause index. This
+predicate is not resatisfiable.
+\begin{BoxedSample}
+  ?- new\_clause\_index(CI).
+  CI = 5
+\end{BoxedSample}
+
+
+\Predicate new_literal_index/1(+-Index).
+
+This predicate unifies |Index| with a unique new index in the clause
+|ClauseIndex|. The index is not reserved in any way. If no associated literal
+is added then the new index will be returned upon the next invocation of
+|new_literal_index/1| again. This predicate is not resatisfiable.
+\begin{BoxedSample}
+  ?- new\_literal\_index(3,I).
+  I = 3-3
+\end{BoxedSample}
+
+
+\subsection{Adding Information to the Matrix}
+
+\Predicate add_clause/1(+Literals).
+
+This predicate takes a list of literals |Literals| and stores all
+contrapositives in the module {\sf matrix}. The hook |add_clause_hook/2| is
+evaluated with the index of the new clause and the list of literals |Literals|
+as arguments. This hook is evaluated after the literals have been added.
+
+The list of literals |Literals| can be preceded by the goal label |?-|. In
+this case the goal label is set also for this clause and the hook
+|add_goal_clause_hook/1| is evaluated at the end. The argument is the index of
+the goal clause.
+
+The following instructions add all clauses to the module {\sf
+  matrix}. Nevertheless the labels and the connections have not been considered yet.
+\begin{BoxedSample}
+  ?- add\_clause([++p(X),--q(f(X),g(X)]).
+  ?- add\_clause([++q(a,X)]).
+  ?- add\_clause([++q(X,Y),--q(f(X),Y)]).
+  ?- add\_clause((?-[--p(Z)])).
+\end{BoxedSample}
+
+\Predicate add_contrapositive/3(+Literal, +Body, +Index).
+
+This predicate adds the contrapositive with the given information to the
+matrix. The entry point of the contrapositive is the literal |Literal| which
+has the index |Index|. |Body| is a list of elements of the form {\em
+  literal(L,I)}\/ where {\em L}\/ is a literal and {\em I}\/ is its index. The
+literals of |Body| are the literals in the contrapositive except |Literal|.
+
+\begin{BoxedSample}
+  ?- add\_contrapositive(++p(X),[literal(--q(f(X),g(X)),1-2)],1-1).
+\end{BoxedSample}
+
+\Predicate add_connection/2(+FromIndex, +ToIndex).
+
+This predicate adds a connection from the literal |FromIndex| to the literal
+|ToIndex|. If such a connection already exists then this predicate simply
+succeeds. The arguments have to be ground.
+\begin{BoxedSample}
+  ?- add\_connection(4-1,1-1).
+\end{BoxedSample}
+
+
+\Predicate add_goal_label/1(+ClauseIndex).
+
+This predicate marks the clause with the index |ClauseIndex| as goal. {\em
+  No}\/ implicit negation is performed! If the given clause has a goal
+label already then the predicate simply succeeds.
+
+The following example adds the goal label to each negative clause.
+\begin{BoxedSample}
+  ?- 'NegativeClause'(NC), add\_goal\_label(NC), fail; true.
+\end{BoxedSample}
+
+\Predicate add_label/2(+ClauseIndex, +Label).
+
+This predicate adds the label |Label| to the clause with the index
+|ClauseIndex|. If the label already exists the predicate simply succeeds.
+
+The following goal may be called from within the parser to store the label of
+the third clause.
+\begin{BoxedSample}
+  ?- add\_label(3,loop).
+\end{BoxedSample}
+
+\Predicate add_resolvent/3(+Index1, +Index2, +Dest).
+
+This predicate performs a single resolution step. The literals $L_1$\/
+identified by |Index1| and the literal $L_2$\/ identified by |Index2| must
+have complementary signs. Those signs are stripped and the pure predicates are
+unified. This unification uses an occurs check.\footnote{This unification may
+  also take into account \eclipse{} metaterms.}
+
+The further operations are determined by the value of |Dest|. The following
+possibilities are provided:
+\begin{description}
+\item[clause({\em ClauseIndex}\/)]\ \\
+  If {\em ClauseIndex}\/ is instantiated then the resolvent replaces the clause
+  {\em ClauseIndex}. If {\em ClauseIndex}\/ is a variable then a new clause is
+  created containing the resolvent. {\em ClauseIndex}\/ is unified with the
+  resulting clause.
+\item[contrapositive({\em Index}\/)]\ \\
+  The resolvent is only performed in the contrapositive {\em Index}. This
+  contrapositive is replaced by the result. {\em Index}\/ has to be
+  sufficiently instantiated. Additionally {\em Index}\/ has to be in a common
+  contrapositive with either |Index1| or |Index2|.
+\end{description}
+
+
+
+
+\subsection{Removing Information from the Matrix}
+
+
+\Predicate delete_matrix/0().
+
+This predicate removes all information stored in the module {\sf matrix}.
+Afterwards the information is no longer accessible. Before the matrix is
+cleared the hook |delete_matrix_hook/0| is evaluated. At this time the matrix
+is still intact. Afterwards the clauses are deleted. This may lead to the
+execution of the hook |delete_clause/1|. See the documentation of the
+predicate |delete_clause_hook/1| for details.
+\begin{BoxedSample}
+  ?- delete\_matrix.
+\end{BoxedSample}
+
+\Predicate delete_clause/1(?ClauseIndex).
+
+This predicate deletes all clauses --- upon backtracking --- for which the
+clause index unifies with |ClauseIndex|.
+
+All information having any relation to the clause being removed is erased.
+
+The hook |delete_clause_hook/1| is evaluated for each clause removed. The
+argument is the instantiated clause index of the clause being deleted. The
+hook is called before any other information about this clause is removed from
+matrix. 
+
+The following example deletes the clause with the index 3.
+\begin{BoxedSample}
+  ?- delete\_clause(3).
+\end{BoxedSample}
+
+\Predicate delete_contrapositive/1(?Index).
+
+This predicate deletes a single contrapositive identified by |Index|. |Index|
+may be un-instantiated in which case all contrapositives are removed upon
+backtracking. The connections starting from the literal |Index| are also
+removed.
+
+The clause as a whole is not affected. Nor are the |ClauseLength| or other
+informations related to the whole clause. As a consequence the clause can
+continue to exist even though there are no contrapositives left for it.
+
+The hook |delete_contrapositive_hook/1| is evaluated for each contrapositive
+being removed. The hook is called before the information is erased from the
+matrix. The argument of the hook is the instantiated index of the
+contrapositive being deleted.
+
+\begin{BoxedSample}
+  ?- delete\_contrapositive(3-2).
+\end{BoxedSample}
+
+\Predicate delete_connection/2(?FromIndex, ?ToIndex).
+
+This predicate deletes upon backtracking all connections for which the
+starting point unifies with |FromIndex| and the end point unifies with
+|ToIndex|. 
+
+The hook |delete_connection_hook/2| is evaluated with the instantiated
+|FromIndex| and |ToIndex| as argument for every connection being removed.
+
+The following example deletes all connections stored in the matrix.
+\begin{BoxedSample}
+  ?- delete\_connection(\_,\_),fail ; true.
+\end{BoxedSample}
+
+\Predicate delete_literal/1(+Index).
+
+This predicate deletes the literal identified by |Index| from the matrix. Any
+information is abolished. All connections to and from this literal are
+deleted. The literal does not occur any longer in any contrapositive or the
+whole clause.
+
+The literal has to be sufficiently instantiated. The predicate fails if the
+specified literal does not exist.
+
+The hook |delete_literal_hook/1| is evaluated before the literal is removed.
+The argument of this hook is the index of the literal to be deleted.
+
+The hooks |delete_contrapositive_hook/1| and |delete_connection_hook/2| may be
+called when the respective information is deleted.
+
+The following example deletes the literal |3-2| from the matrix.
+\begin{BoxedSample}
+  ?- delete\_literal(3-2).
+\end{BoxedSample}
+
+\Predicate delete_goal_label/1(?ClauseIndex).
+
+This predicate deletes the goal label of the given clause. |ClauseIndex| is in
+turn unified with all clause indices having a goal label. The   predicate is
+resatisfiable until no more unifying goal clause is present.
+\begin{BoxedSample}
+  ?- delete\_goal\_label(CI).
+  CI = 4
+  ;
+  No more solution
+\end{BoxedSample}
+
+\Predicate delete_label/2(?ClauseIndex, ?Label).
+
+This predicate deletes the label |Label| of the given clause |ClauseIndex|.
+The predicate is resatisfiable until no more labels are present.
+\begin{BoxedSample}
+  ?- delete\_label(CI,Label).
+  CI = 2
+  Label = base
+  ;
+  CI = 3
+  Label = loop
+  ;
+  No more solution
+\end{BoxedSample}
+
+
+\subsection{Printing the Matrix}
+
+\Predicate show_matrix/2(+Prefix, +Stream).
+
+The current matrix is printed onto the stream |Stream|.  Each line written is
+preceded by the string |Prefix|.  The format used is suitable for reading it
+back in if |Prefix| is the empty string.
+
+|Stream| can also be a symbolic stream of \eclipse. E.g. |output| directs the
+matrix to the standard output stream.
+\begin{BoxedSample}
+  ?- show\_matrix("\%", output).
+  \%      [ \% Clause 1
+  \%        ++ p(X),
+  \%        -- q(f(X),g(X))
+  \%      ].
+  \% base:: [  \% Clause 2
+  \%        ++ q(a,X)
+  \%      ].
+  \% loop:: [  \% Clause 3
+  \%        ++ q(X,Y),
+  \%        -- q(f(X),Y)
+  \%      ].
+  \% ?-   [  \% Clause 4
+  \%         -- p(Z)
+  \%      ].
+\end{BoxedSample}
+
+\Predicate show_contrapositives/2(+Prefix, +Stream).
+
+The current list of contrapositives is printed onto the stream |Stream|.  Each
+line written is preceded by the string |Prefix|.
+
+|Stream| can also be a symbolic stream of \eclipse. E.g. |output| directs the
+matrix to the standard output stream.
+\begin{BoxedSample}
+  ?- show\_contrapositives(" ", output).
+    ++ p(X) <- \% (1 - 1)
+           -- q(f(X),g(X)).
+    -- q(f(X),g(X)) <- \% (1 - 2)
+           ++ p(X).
+    ++ q(a,X). \% (2 - 1)
+    ++ q(X,Y) <- \% (3 - 1)
+           -- q(f(X),Y).
+    -- q(f(X),Y) <- \% (3 - 2)
+           ++ q(X,Y).
+    -- p(Z). \% (4 - 1)
+\end{BoxedSample}
+
+%
+% Local Variables: 
+% mode: latex
+% TeX-master: t
+% End: 

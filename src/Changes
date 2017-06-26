@@ -1,0 +1,136 @@
+%%%****************************************************************************
+%%% $Id: Changes,v 1.8 1995/07/03 11:35:12 gerd Exp gerd $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%****************************************************************************
+%%% This file contains a short description of the user visible changes
+%%% for any new version of ProCom/ProTop.
+%%%----------------------------------------------------------------------------
+
+\begin{Changes}	
+\item none
+\end{Changes}
+
+\LogDate{Changes in Version 1.69  }{Mon Jul  3 13:36:28 MET DST 1995}
+%----------------------------------
+
+\begin{Changes}	
+\item prove: Automatic options are reset to their initial value properly. This
+  fixes a minor bug in previous releases.
+\end{Changes}
+
+\LogDate{Changes in Version 1.68  }{Fri Jun 23 08:36:49 MET DST 1995}
+%----------------------------------
+
+\begin{Changes}	
+\item ProCom: The justifications in the proof tree do no longer contain mere
+  output constructors. 
+
+  The name of a descriptor is made the first element of a justification --- if
+  one has been given.
+\end{Changes}
+
+\LogDate{Changes in Version 1.67  }{Thu May 18 14:58:02 MET DST 1995}
+%----------------------------------
+
+\begin{Changes}	
+\item none
+\end{Changes}
+
+\LogDate{Changes in Version 1.66  }{Mon May 15 22:04:00 MET DST 1995}
+%----------------------------------
+
+\begin{Changes}	
+\item ProCom: capricore is now responsible for providing the proof tree. The
+  user info is stored there but the user has no deeper control. Thus it is
+  possible to define a consistent structure of the proof tree.
+
+\item matrix: minor ugliness in |show_matrix/2| eliminated.
+
+\item ProCom: The main predicate |goal/1| saves its argument in the predicate
+  |log_file/1|. Thus other libraries can write something to the log file.
+\end{Changes}
+
+\LogDate{Changes in Version 1.65  }{Thu May  4 15:08:56 MET DST 1995}
+%----------------------------------
+
+\begin{Changes}	
+\item The command line flag |-a| has been added to automatically load the
+  compatibility file {\sf ancient.pt}.
+
+\item The target |.emacs| has been added to the {\sf Makefile}. This target
+  creates a file {\sf .emacs} which loads the pt-mode appropriately. This
+  target is triggered automatically with\\
+  |  make config|
+
+\item ProTop: instruction |op/3| introduced. Old operators in {\sf ancient.pt}
+  defined appropriately.
+\end{Changes}
+
+\LogDate{Changes in Version 1.64  }{Mon May  1 21:53:18 MET DST 1995}
+%----------------------------------
+
+\begin{Changes}
+\item A major mode for GNU-Emacs to edit ProTop script files has been included
+  in the distribution in {\sf Emacs/pt-mode.el}.
+
+\item ProTop: The |call| instruction is more robust now. Undefined predicates
+  should not lead to a crash any more.
+
+\item The message |bye| issued at the end of protop. has been eliminated.
+
+\item The format of the log file has been changed and expanded. Additional
+  information is stored there. E.g. the contrapositives. The report generating
+  routines in {\sf ProTop/proof\_report} have been updated accordingly.
+
+\item ProTop: The commands |report_matrix| and |report_options| are obsolete.
+  They are subsumed by the option |prove:log_items|. Thus they have been
+  removed.
+
+\item ProTop: command |report| introduced to bundle all report related
+  commands. The commands |report_|* are obsolete. |report| and the associated
+  keywords are declared as prefix operators to allow a simple notation. The
+  operator declarations for the commands |report_|* have been removed.
+
+  With the new commands you can write\\
+  |  report title "Experiments with ProCom".|\\
+  instead of the old variant\\
+  |  report_title("Experiments with ProCom").|
+  
+  Note that obsolete commands can still be used if the compatibility file {\sf
+    ancient} is included in a {\sf .protop} file or a script file.
+
+\item ProTop: the commands |status|, |list|, and |show| are defined
+  synonymously. They can also present options and macros.
+
+  The command |show_macro| is obsolete. The samme effect can be achieved with
+  |show macro|.
+
+  The command |list_option| is obsolete. The same effect can be achieved with
+  |list option|.
+
+  The command |show| has been generalized. The old meaning is preserved if the
+  argumennnt is a string.
+
+\item ProTop: the command version has been obsolete for a long time. Now it is
+  removed.
+
+\item ProTop: |delete_macro| renamed to |delete macro|. Both stay visible
+  until other delete commands occur.
+
+\item File {\sf Changes} introduced to document user visible changes.
+\end{Changes}
+
+%
+% Local Variables: 
+% mode: latex
+% TeX-master: "Listing/changelog"
+% End: 

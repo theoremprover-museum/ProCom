@@ -1,0 +1,91 @@
+
+\def\Timeout{---}
+\def\NoTime{}
+
+
+
+\def\PRHeadSummary{\newpage}
+\def\PRSummaryHeadFont{\Large\bf}
+\def\PRSummarySubHeadFont{\large}
+
+\newif\ifPR@summary@init
+\newif\ifPR@head@line
+
+\newenvironment{Summary}[2]{%
+	\begingroup%
+	\PRHeadSummary%
+	\let\HLINE=\hline%
+	\let\Row=\PR@SummaryRow%
+	\let\Head=\PR@SummaryHead%
+	\let\SubHead=\PR@SummarySubHead%
+	\let\Titles=\PR@SummaryTitle%
+	\let\Section=\PR@SummarySection%
+	\let\Time=\PR@SummaryTime%
+	\let\Label=\PR@SummaryLabel%
+	\PR@summary@initfalse%
+	\def\PR@summary@head{}
+	\def\PR@summary@subhead{}
+	\def\PR@summary@titles{}
+	\def\PR@summary@length{#1}
+	\def\PR@summary@format{#2}
+}{%
+	\ifPR@summary@init\end{supertabular}\fi%
+	\endgroup
+}
+
+\def\PR@INIT{%
+	\tablefirsthead{\hline}%
+	\tablehead{\hline\multicolumn{\PR@summary@length}{|l|}{...continued}%
+		   \\\hline
+		}%
+	\tabletail{\hline\multicolumn{\PR@summary@length}{|r|}{continued...}%
+		   \\\hline}%
+	\tablelasttail{\hline}%
+	\begin{supertabular}{\PR@summary@format}%
+%	\typeout{xxxxxxxxxxxxxxxxxxxxxx}%
+%	\typeout{\PR@summary@format}%
+%	\typeout{xxxxxxxxxxxxxxxxxxxxxx}%
+	|
+	}
+\def\PR@SummaryHead#1{%
+	\gdef\PR@summary@head{%
+	\multicolumn{\def\PR@summary@length}{|c|}{\PRSummaryHeadFont\rule[-1ex]{0pt}{3.5ex}#1}%
+	\\\hline}}
+\def\PR@SummarySubHead#1{%
+	\gdef\PR@summary@subhead{%\PR@summary@subhead%
+	\multicolumn{\def\PR@summary@length}{|c|}{\PRSummarySubHeadFont\rule[-1ex]{0pt}{3.5ex}#1}%
+	\\\hline}}
+
+\def\PR@SummaryRow[#1][#2][#3]{%
+	\ifPR@summary@init\else\global\PR@summary@inittrue\PR@INIT%
+	\fi%
+	#1&#2&#3\\\hline}
+
+%\def\PR@SummaryRow{%
+%	\ifPR@summary@init\else\global\PR@summary@inittrue\PR@INIT%
+%	\fi%
+%	\PR@SummaryRow@B}
+%\def\PR@SummaryRow@B[#1]{%
+%%	\typeout{aaaaaaaaaaaaaaaa}%
+%	#1 
+%%	\typeout{bbbbbbbbbbbbbbbb}%
+%	\@ifnextchar[{\PR@SummaryRow@A}{\\\hline}}
+%\def\PR@SummaryRow@A[#1]{%
+%%	\typeout{cccccccccccccccc}%
+%	& 
+%%	\typeout{dddddddddddddddd}%
+%	#1 \@ifnextchar[{\PR@SummaryRow@A}{\\\hline}}
+
+\def\PR@SummaryTitle[#1]{%
+%	\ifPR@head@line\hline\hline\fi%
+%	\multicolumn{1}{|c|}{#1}%
+	\@ifnextchar[{\PR@SummaryTitle@A}{}}%\\\hline}}
+\def\PR@SummaryTitle@A[#1]{%
+%	&\multicolumn{1}{|c|}{#1}%
+	\@ifnextchar[{\PR@SummaryTitle@A}{}}%\\\hline}}
+
+\def\PR@SummaryLabel#1{#1}
+\def\PR@SummaryTime#1{#1}
+\def\PR@SummarySection#1{#1}
+
+\input supertab.sty

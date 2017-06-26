@@ -1,0 +1,227 @@
+%%*****************************************************************************
+%% $Id$
+%%*****************************************************************************
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%****************************************************************************
+
+\chapter{Using Setheo within \ProTop}
+
+
+\section{Overview}
+
+\ProTop{} is able to handle internal and external provers. The capability to
+handle external provers is demonstrated by the integration of otter. Otter is
+a prover written in C which has to be run as a separate process. Setheo
+consists of three programs which have to be run one after the other. The input
+matrix is given to the first program. Intermediate files are created by Setheo
+to hand on the current representation of the problem. Each program can receive
+flags in the command line.
+
+\ProTop{} has to translate to internal representation of the matrix in a form
+acceptable by Setheo. The external processes have to be started and finally
+the output has to be analyzed and translated into a form handeled by \ProTop.
+
+To start Setheo the option |prover| has to be set to the value |setheo|. Then
+the proof can be started as usual. This is shown in the example in
+figure~\ref{fig:setheo} which assumes us to be in the \ProTop{} interactive
+mode.
+
+\begin{figure}[ht]
+\begin{BoxedSample}
+ ProTop -> |prover = setheo.|
+ ok.
+ ProTop -> |prove 'eder1-2'.|
+ \% No input filter requested
+ \% Reading matrix file eder1-2
+ 2 clauses read in 0 ms 
+ Connection graph: 17 ms 
+ complete\_goals.pl compiled traceable 1396 bytes in 0.03 seconds
+ inwasm V3.2 Copyright TU Munich (March 25, 1994) 
+ command line: /home/setheo/bin/inwasm -cons -verbose eder1-2 
+ eder1-2.s generated in  0.00 seconds
+ wasm V3.2 Copyright TU Munich (March 25, 1994)
+ Command line: /home/setheo/bin/wasm -opt -verbose eder1-2 
+ Assembler optimization: 16 labels read, 8 labels output
+ eder1-2.hex generated in  0.03 seconds
+ \% All negative clauses are considered as goals.
+ complete\_goals 0 ms 
+
+ \%\char"7C\ Proof with goal clause 1
+ \%\char"7C\      ext
+ \%\char"7C\      2 - 1
+ ...
+ ok.
+ ProTop -> 
+\end{BoxedSample}
+\caption{A session with setheo.}\label{fig:setheo}
+\end{figure}
+
+
+
+\section{Options for Setheo}
+
+The module setheo provides the following options to adjust its behaviour:
+
+\begin{description}
+  \item [setheo:flags] | = [cons,opt,verbose,dr].|
+    \\
+    This option contains a list of flags for Setheo. a detailed description can
+    be found in section \ref{setheo:flags}.
+
+  \item [setheo:executable] | = "setheo".|
+    \\
+    This option contains the executable UNIX command which starts setheo. If
+    this executable can not be found on the search path of the UNIX shell used
+    it might be neccesary to specify the full file name --- including the
+    complete path.
+
+    This option is initialized from the valued specified in the Makefile
+    during the installation process. Usually it should not need modification.
+
+  \item [setheo:tmpdirs] | = [indir,".","/tmp","~"].|
+    \\
+    This option specifies a list of directories which might be used to create
+    intermediate files. The list is tried from left to right to find a
+    directory which is writable. The first such directory is used to create
+    the intermediate files for setheo.
+
+    The elements of this list are interpreted as directories. They can be
+    absolute or relative to the current directory. The tilde |~| can be used
+    to refer to the home directory of the user. The special symbol |indir| can
+    be used to refer to the directory containing the input file.
+
+  \item [setheo:remove\_tmp\_files] | = off.|
+    \\
+    At the end of the proof attempt the intermediate files created for the
+    communication with setheo are removed if this boolean option is |on|.
+    Otherwise they are left unchanged. This can be useful to understand how
+    setheo is called and get more details what setheo has done.
+
+\end{description}
+
+
+\section{Flags of Setheo}\label{setheo:flags}
+
+Setheo can be configured with a large number of flags. Most of those
+flags\footnote{Only those flags which might disturb \ProTop{} have been
+  disabled.} are usable from within \ProTop. For a detailed discussion of the
+flags we refer to the Setheo documentation. The following description only
+mentiones a few. The main emphasis is on the way how to use them from within
+\ProTop.
+
+Setheo has two kind of flags: boolean flags and numeric flags. The
+specifications for those flags is combined in the option |setheo:flags| which
+contains a list of those.
+
+The names of the flags are symbols in the sense of Prolog. Thus those names
+are used to name the flags in the context of \ProTop{} as well. The Setheo
+interface known to which program a flag belongs. Thus all relevant flags for
+the programs are used and the others omitted.
+
+
+\subsection{Boolean Flags}
+
+Boolean flags can be turned on by specifying them on the command line. In
+absense they are turned off.
+
+E.g. if the list in |setheo:flags| contains the element |dr| then the Setheo
+(|sam|) flag |dr| is set.\footnote{The flag |dr| turns on the iterative
+  deepening search on the depth of the proof tree.}
+
+
+\subsection{Numeric Flags}
+
+Numeric flags can take numeric values. Arbitrary numbers can be assigned to
+numeric flags.
+
+To assign a value {\em n}\/ to a numeric flag {\em flag}\/ simply add an
+element {\em flag {\tt=} n} to the list of flags |setheo:flags|.
+
+E.g. if the list in |setheo:flags| contains the element |trail=1000000| then
+the numeric flag |trail| (of |sam|) is set to the value 1000000.
+
+
+\begin{figure}[t]
+{\scriptsize
+\catcode`|=\other
+\def\SetheoFlag#1#2#3{\tt #1 \sl #2&#3\\\hline}%
+\null\hfill\hfill
+\begin{tabular}{|p{10em}c|}\hline \bf Flag & \bf Program \\\hline\hline
+  \SetheoFlag{purity}{}{inwasm}
+  \SetheoFlag{nopurity}{}{inwasm}
+  \SetheoFlag{nofan}{}{inwasm}
+  \SetheoFlag{reduct}{}{inwasm}
+  \SetheoFlag{noreduct}{}{inwasm}
+  \SetheoFlag{nosgreord}{}{inwasm}
+  \SetheoFlag{noclreord}{}{inwasm}
+  \SetheoFlag{notree}{}{inwasm}
+  \SetheoFlag{randreord}{}{inwasm}
+  \SetheoFlag{eqpred}{}{inwasm}
+  \SetheoFlag{all}{}{inwasm}
+  \SetheoFlag{reg}{}{inwasm}
+  \SetheoFlag{subs}{}{inwasm}
+  \SetheoFlag{taut}{}{inwasm}
+  \SetheoFlag{cons}{}{inwasm}
+  \SetheoFlag{foldup}{}{inwasm}
+  \SetheoFlag{foldupx}{}{inwasm}
+  \SetheoFlag{folddown}{}{inwasm}
+  \SetheoFlag{folddownx}{}{inwasm}
+  \SetheoFlag{partialtree}{}{inwasm}
+  \SetheoFlag{nopartialtree}{}{inwasm}
+  \SetheoFlag{verbose}{= number}{inwasm}
+  \SetheoFlag{verbose}{}{inwasm}
+  \SetheoFlag{verbose}{}{wasm}
+  \SetheoFlag{opt}{}{wasm}
+\end{tabular}\hfill
+\begin{tabular}{|p{10em}c|}\hline \bf Flag & \bf Program \\\hline\hline
+  \SetheoFlag{d}{= number}{sam}
+  \SetheoFlag{d}{}{sam}
+  \SetheoFlag{i}{= number}{sam}
+  \SetheoFlag{i}{}{sam}
+  \SetheoFlag{dr}{= number}{sam}
+  \SetheoFlag{dr}{}{sam}
+  \SetheoFlag{ir}{= number}{sam}
+  \SetheoFlag{ir}{}{sam}
+  \SetheoFlag{loci}{}{sam}
+  \SetheoFlag{locir}{}{sam}
+  \SetheoFlag{anl}{}{sam}
+  \SetheoFlag{reg}{}{sam}
+  \SetheoFlag{st}{}{sam}
+  \SetheoFlag{cons}{}{sam}
+  \SetheoFlag{code}{= number}{sam}
+  \SetheoFlag{stack}{= number}{sam}
+  \SetheoFlag{cstack}{= number}{sam}
+  \SetheoFlag{heap}{= number}{sam}
+  \SetheoFlag{trail}{= number}{sam}
+  \SetheoFlag{symbtab}{= number}{sam}
+  \SetheoFlag{seed}{= number}{sam}
+  \SetheoFlag{v}{= number}{sam}
+  \SetheoFlag{v}{}{sam}
+  \SetheoFlag{verbose}{= number}{sam}
+  \SetheoFlag{verbose}{}{sam}
+\end{tabular}\hfill\hfill\null}
+
+  \caption{The Flags of Setheo}\label{fig:setheo.flags}
+\end{figure}
+
+\subsection{List of Flags}
+
+The table \ref{fig:setheo.flags} contains a complet list of Setheo flags as
+understood by the \ProTop/Setheo interface.  {\em Program}\/ denotes one of
+the setheo programs |inwasm|, |wasm|, or |sam|.  If the flag is followed by
+``{\em = number}'' then a numeric argument is required. See the documentation
+of Setheo for further details.
+
+%
+% Local Variables: 
+% mode: latex
+% TeX-master: nil
+% End: 

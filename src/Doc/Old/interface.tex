@@ -1,0 +1,63 @@
+%%%****************************************************************************
+%%% $Id: interface.tex,v 1.1 1994/10/18 18:42:27 gerd Exp $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1994 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%****************************************************************************
+% Master File: use-capri.tex
+
+%------------------------------------------------------------------------------
+\section{Getting Started}
+
+In this section we assume that \ProCom{} has been installed as described in
+section \ref{sec:installation} and \ProCom{} is accessible as the command
+|procom|.
+
+In this section we will see how \ProCom{} can be used as a stand-alone theorem
+prover. 
+
+\subsection{The TTY and X11 Interfaces}
+
+The tty based interface has evolved to the \ProTop\ shell. It is described in
+a separate documentation.
+
+The X11 Interface is under construction. The documentation will be completed
+when the interface is stable.
+
+
+\subsection{The Prolog-Interface}
+
+In a testing phase it can be desirable to avoid the generation of a
+stand-alone version of \ProCom{} as described in section \ref{sec:recompile}.
+Thus we will describe shortly how to proceed.
+
+We assume that you are in the \ProCom{} installation directory {\sf ProCom}
+and \ProCom{} has been installed properly as described in section
+\ref{sec:installation}.
+
+|% xeclipse|
+
+|?- [main]|
+
+|?- run(|{\em InFile}|, |{\em OutFile}|).|
+
+|?- compile(|{\em OutFile}|).|
+
+|?- goal.|
+
+
+Alternately you can use the following scheme:
+
+
+|% xeclipse|
+
+|?- [main]|
+
+|?- prove(|{\em InFile}|).|

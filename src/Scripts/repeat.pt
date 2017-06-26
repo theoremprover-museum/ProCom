@@ -1,0 +1,16 @@
+%%%****************************************************************************
+%%%* $Id: repeat.pt,v 1.1 1995/01/11 09:15:45 gerd Exp $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%============================================================================
+
+repeat 10 times
+	write('.').

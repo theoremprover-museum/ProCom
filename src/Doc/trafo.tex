@@ -1,0 +1,82 @@
+%%*****************************************************************************
+%% $Id: trafo.tex,v 1.1 1994/10/18 18:42:27 gerd Exp $
+%%*****************************************************************************
+%% Author: Gerd Neugebauer
+%%-----------------------------------------------------------------------------
+\documentstyle[11pt,dina4,fleqn,logic]{article}
+
+
+\def\Proof{\mbox{\it Proof}}
+\def\goal#1{\mbox{\it goal#1}}
+
+\begin{document}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Literal Transformations}
+
+To translate a literal into a prolog term we have to consider the following
+points:
+\begin{itemize}
+  \item We have to encode the negation into the predicate name. For safety we
+  also encode the original arity.
+  \item We have to add the path as additional argument.
+  \item We have to add a depth argument.
+  \item We have to add an argument to retrun the proof tree.
+  \item To cope with a missing occurs check it may turn out necessary to
+  separate the variables.
+\end{itemize}
+
+
+
+\section{Goal Transformations}
+
+When transforming a set of goal clauses into a Prolog program several non
+logical features have to be considered. These features are
+\begin{itemize}
+  \item To ensure a complete search strategy one might consider to iterate
+  some kind of depth bound. This depth bound has to be initialized and managed
+  appropriately. 
+  \item Sometimes it is desirable to measure the proof time. For this purpose
+  the timer has to be started and finally the time computed and printed.
+  \item If you are not only interested in a simple {\em valid} or {\em
+  invalid} we have to collect to answer substitution and maybe the proof and
+  present them at the end. Additionally we may want to write this information
+  to a protocol file.
+  \item Finally it can be desirable to compute more than one solution. This
+  can either be done by specifying how much, or which solution we are
+  interested in. Alternatively we may implement a user interaction which
+  allows us to ask for another solution.
+\end{itemize}
+
+Let $C=\{L_1,\ldots,L_m\}$\/ be a set of literals
+\begin{Formula}
+  \pi(C,D,P,\Proof) := \pi(L_1,D,P,\Proof_1),\ldots,\pi(L_m,D,P,\Proof_m),
+  \Proof = (\Proof_1,\ldots,\Proof_m).
+\end{Formula}
+
+
+Let $G=\{G_1,\ldots G_n\}$\/ be a complete set of goals, where 
+
+
+\begin{Formula}
+  \goal{}(F) \IF
+  \=	set\_time(T_0),
+  \=	goals_0,
+  \=	set\_depth(D),
+  \=	goals_1(D),
+  \=	init\_path(P),
+  \=	\goal{\_dis}(D,P,\Proof,F),
+  \=	show\_time(T_0,F),
+  \=	show\_proof(\Proof,F).
+\end{Formula}
+
+\begin{Formula}
+  \goal{\_dis}(D,P,\Proof,F) \IF
+  \=	\pi(G_i,D,P,\Proof),
+  \=	goals_{post}(D,P),
+  \=	show\_vars(G_i).
+\end{Formula}
+
+
+
+
+\end{document}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

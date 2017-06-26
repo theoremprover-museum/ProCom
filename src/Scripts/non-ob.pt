@@ -1,0 +1,60 @@
+%%%****************************************************************************
+%%%* $Id: non-ob.pt,v 1.2 1995/05/01 19:47:03 gerd Exp $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%============================================================================
+%%
+%% Sample ProCom script file
+%%
+
+include(ancient).
+
+%--- Define a useful macro.
+experiment(File,Info) := 
+	report(text(Info)),
+	prove(File).
+
+%--- Reset the options to their default values.
+reset_options.
+
+%--- Initialize the log file.
+report init   '.log_file' .
+report title  "Some Experiments With the Non-Obvious Example.".
+report author "Gerd Neugebauer".
+
+%--- Set some options and run an experiment
+  'ProTop:verbose'	= off.
+  verbose		= off.
+  'run:remove_prover'	= off.
+  'ProCom:show'		= off.
+  'run:time_limit'	= 1000.
+
+report section "Default".
+report label   default.
+experiment('non-ob',
+"The non-obvious example with the default settings of ProCom.").
+
+%--- Reset options and another experiment.
+  'ProCom:optimize'	= off.
+
+report section "Unoptimized".
+report label   unopt.
+experiment('non-ob',"The non-obvious example without the optimizer of ProCom.").
+
+%--- Reset options and another experiment.
+  'ProCom:optimize'	= on.
+  'ProCom::identical_ancestor'	= 'prune-delayed.pl'.
+
+report section "Regularity".
+report label   reg.
+experiment('non-ob',"The non-obvious example with regularity constraints of ProCom.").
+
+generate_report.

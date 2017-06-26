@@ -1,0 +1,292 @@
+%%%****************************************************************************
+%%% $Id: filters.tex,v 1.4 1995/04/24 21:29:11 gerd Exp $
+%%%============================================================================
+%%% 
+%%% This file is part of ProCom.
+%%% It is distributed under the GNU General Public License.
+%%% See the file COPYING for details.
+%%% 
+%%% (c) Copyright 1995 Gerd Neugebauer
+%%% 
+%%% Net: gerd@imn.th-leipzig.de
+%%% 
+%%%****************************************************************************
+
+\section{\ProTop{} Filters}
+
+The first phase of the processing of an input file which is performed by
+\ProTop{} consists of the application of a series of input filters. Those
+filters take the ASCII representation and transform it. The result is given to
+the next filter in the chain.
+
+The filters which are used are set with the option |input_filter| (see
+page~\pageref{opt:input_filter}). 
+
+
+
+
+
+
+The details of writing your own filters can be found in
+appendix~\ref{chap:writing.filters}. 
+
+The following sections describe (some of) the filters provided with \ProTop.
+
+
+\subsection{The Filter {\tt none}}
+
+The filter {\tt none} is a very simple filter which does simply nothing. It is
+mainly provided as a basis for your own development of a filter.
+
+
+\subsection{The Filter {\tt tee}}
+
+The filter {\tt tee} provides a means to trace or log the data flow in a
+filter chain.  If this filter is part of a chain then it acts like the empty
+filter.  I.e. the input is passed through. As a side effect it stores
+everything passed through also in the file specified by the option
+|tee:file|\index{tee:file}.
+
+The value of the option |tee:file| is an atom or string denoting a file name.
+Some atoms have a special meaning. |output| and |stdout| denote the output
+stream.  |stderr| denotes the standart error stream. If such an reeserved
+value is encountered then the associated stream is used instead of opening a
+file.  If a file is used then the output is appended to this file.
+
+The option |tee:file| defaults to the value |output|.
+
+Instead of specifying the output file in the option |tee:file| it is possible
+to give the name as additional argument to the filter. Thus it is possible to
+redirect the output of several incarnations of tee to different files:
+
+The following example logs the input and the output of the filter
+|mult_taut_filter| in the two files |file1| and |file2| respectively.
+
+\begin{BoxedSample}
+  input\_filter = [tee(file1),mult\_taut\_filter,tee(file2)]
+\end{BoxedSample}
+
+
+\subsection{The Filter {\tt tptp}}
+
+The filter {\tt tptp} provides an interface to the TPTP library (Thousand of
+problems for theorem provers). It is written such that files in the TPTP
+syntax can be read in. It follows the conventions of the TPTP library. See the
+documentation of the TPTP library for details.
+
+This filter is especially useful when you want to experiment with the problems
+from the TPTP library. For this purpose this filter should be the first one.
+
+This filter uses the following option:
+\begin{description}
+\item[tptp:home] This option contains the complete path to the installed TPTP
+  library. Usually this options should be set at installation time properly.
+\end{description}
+
+
+\subsection{The Filter {\tt mult\_taut\_filter}}
+
+The filter {\tt mult\_taut\_filter} perform the reductions mult and taut on
+the input problem. The filter understands the input syntax of the parser. Thus
+it is recommended to use this filter as one of the last ones.
+
+The mult reduction deletes multiple occurences of literals in a clause and
+leaves only one instance of such a literal. This filter only removes identical
+literals. Unification is not involved. With this restriction this
+transormation is equivalence preserving.
+
+The taut reduction deletes clauses which contain a literal as well as its
+negated form. Only identical literals --- up to the complementary sign --- are
+considered. No unification is involved. With this restriction the
+transformation is equivalence preserving.
+
+
+\subsection{The Filter {\tt mpp}}
+
+The filter {\tt mpp} provides a {\em M}\/acro {\em P}\/re{\em P}\/rocessor
+similar to the C preprocessor |cpp|. It is possible to define macros which are
+expanded in the remainder of the file. Inclusion of other files and
+conditional parts can also be specified. Last but not least it is possible to
+define additional operators for syntactic sugar.
+
+The filter {\tt mpp} provides additional meta instructions. Those meta
+instructions are evaluated by this filter and noit passed through. The meta
+instructions start with the symbol |#|.\footnote{This is defined as a prefix
+  operator in \ProTop.} The following meta instructions are evaluated by {\tt
+  mpp}: 
+
+\begin{description}
+\item [\#include {\em File}.]\ \\
+  The contents of file {\em File} is included instead of this instruction as
+  if it was there already. Nevertheless only complete clauses can be contained
+  in this file. It is not possible to include parts of clauses.
+
+  The included files are searched with the same algorithm as files specified
+  as input files. I.e. if they are not absolute then they are searched in the
+  directories given in the option
+  |input_path|\index{input\_path}. Additionally the extensions stored in the
+  option |input_extensions|\index{input\_extensions} are taken into account.
+
+  The following example includes the file {\sf common}:
+
+\begin{BoxedSample}
+  \#include "common".
+\end{BoxedSample}
+
+\item [\#op({\em Precedence}, {\em Associativity}, {\em Name}\/).]\ \\
+  For the remainder of this file the operator {\em Name} with precedence {\em
+    Precedence} and associativity {\em Associativity} is defined. See the
+  Prolog documentation on |op/3| for details.
+
+  {\bf Note:} This operator is not automatically defined in the next filter!
+
+  It might be a good practice to define a translation rule for any
+  operator. Thus it can be translated into a ``normal'' operator not written
+  in infix, postfix, or prefix notation. This helps avoiding confusion in the
+  following parts of the system.
+
+  The following example defines an operator |==>| which is used
+  afterwards. Without the declaration this example would lead to an syntax
+  error.
+
+\begin{BoxedSample}
+  \#op(900,xfx,(==>)).
+  p(X) ==> q(X,f(X)).
+  q(11,32).
+\end{BoxedSample}
+
+\item [\#define {\em Head} = {\em Tail}.]\ \\
+  The macro definition specified in this instruction is stored. This does not
+  overwrite previous definitions but is added. In the macro expansion the
+  first unifying definition is applied.  The usual Prolog rules for variables
+  are used.
+
+  The definitions are applied at every level. This means that they are used at
+  the formula level as well as on the term level.
+
+\begin{BoxedSample}
+  \#define a = new\_a.
+  \#define p(X,new\_a) = pa(X).
+
+  q(A).
+  p(X,a).
+  a.
+\end{BoxedSample}
+  The result is
+\begin{BoxedSample}
+  q(\_g123).
+  p(\_g123,new\_a).
+  new\_a.
+\end{BoxedSample}
+
+  To complete our example started in section on operator declaration we can
+  define a translation rule (macro) to translate |==>| terms into the normal
+  implication form supported by \ProTop.
+
+\begin{BoxedSample}
+  \#op(900,xfx,(==>)).
+  \#define (A ==> B) = (B :- A).
+  p(X) ==> q(X,f(X)).
+\end{BoxedSample}
+
+\item [\#define {\em Head}.]\ \\
+  This is the same as defining {\em Head}\/ to 1. This is especially useful in
+  combination with conditional inclusion of clauses (see below).
+
+\begin{BoxedSample}
+  \#define use\_equality\_axioms
+\end{BoxedSample}
+
+\item [\#undef {\em Pattern}.]\ \\
+  Since macros are added but not overwritten we need a way to get rid of a
+  macro. The undef instruction removes all macros for which the head is
+  unifiable with {\em Pattern}. If no matching macro is found nothing is done.
+
+  In the following example two macros are defined and the first one is deleted
+  afterwards. 
+\begin{BoxedSample}
+  \#define mac(1,X) m1(X)
+  \#define mac(2,X) m2(X)
+  \#undef mac(1,\_)
+\end{BoxedSample}
+  The following instruction would have deleted both macros:
+\begin{BoxedSample}
+  \#undef mac(\_,\_)
+\end{BoxedSample}
+
+\item [\#if {\em Condition}.]\ \\
+  {\em Condition}\/ is evaluated. If it evaluates to true then the block to
+  the next matching |#else| or |#endif| is used. The |#else| to |#endif| block
+  is ignored. Otherwise the block between the next matching |#else| and the
+  |#endif| is used.
+
+\begin{BoxedSample}
+  \#if defined(use\_equality\_axioms).
+  \#include equality\_axioms.
+  \#endif.
+\end{BoxedSample}
+
+  They following conditionals are recognized by the |#if| instruction:
+
+  \begin{description}
+  \item [defined({\em Pattern}\/)]\ \\
+    This condition evaluates to true iff a macro is defined for which the head
+    is unifiable with {\em Pattern}.
+
+  \item [not({\em Condition})]\ \\
+    This condition evaluates to true iff {\em Condition} does not evaluate to
+    true.
+  \item [{\em Condition},{\em Condition}]\ \\
+    A conjunction evaluates to true iff all conjuncts evaluate to true.
+
+  \item [{\em Condition};{\em Condition}]\ \\
+    A disjunction evaluates not to true iff at least one disjunct evaluates
+    not to true.
+  \end{description}
+
+\item [\#else.]\ \\
+  Switch to the alternate block started with a previously matching |#if|,
+  |#ifdef|, or |#ifndef|.
+
+\item [\#endif.]\ \\
+  This instruction ends a block started with |#if|, |#ifdef|, or |#ifndef|.
+
+\item [\#ifdef {\em Spec}.]\ \\
+  This is the same as |#if defined(|{\em Spec}\/|)|.
+  
+\item [\#ifndef {\em Spec}.]\ \\
+  This is the same as |#if not(defined(|{\em Spec}\/|))|.
+\end{description}
+
+
+The filter {\tt mpp} provides the hook |mpp_hook/1| which is called just
+before the first clause is read. This hook can be used to add definitions or
+include files at startup under the control of a Prolog program. For this
+purpose several Prolog procedures are exported. See the implementation
+description of {\tt mpp} for details.
+
+
+\subsection{The Filter {\tt equality\_axioms}}
+
+The filter {\tt equality\_axioms} adds the axioms and axiom schemata needed to
+handle the equality. This means that an axiomatization of equality is added
+and the proof is carried out without any special knowledge of equality.
+
+The predicate |=/2| is assumed to be the equality predicate. The generated
+clauses use this predicate.
+
+
+
+\subsection{The Filter {\tt E-flatten}}
+
+The filter {\tt E-flatten} provides an alternative treatment of equality
+predicates.
+
+
+\subsection{The Filter {\tt constraints}}
+
+The filter {\tt constraints} provides a means to divide the matrix into a
+matrix with constraints and a Horn-(Prolog) program. An enhanced syntax is
+used to specify those parts and their interaction.
+
+

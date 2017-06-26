@@ -1,0 +1,68 @@
+
+paramodulate(LHS,RHS,Term,NewTerm) :-
+	nonvar_subterm(Term,NewTerm,Var,SubTerm),
+	unify(Var,RHS),
+	unify(SubTerm,LHS).
+	
+/*PL%^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+\Predicate nonvar_subterm/4(Term+,NewTerm?,Var-,SubTerm-).
+
+Compute successively all subterms \verb|SubTerm| of \verb|Term| which
+are not a variable. Return the subterm aswell as the original term
+with \verb|SubTerm| replaced by \verb|Var|.
+
+\PL*/
+nonvar_subterm(Term,NewTerm,Var,SubTerm) :-
+	(   var(Term) -> fail
+        ;
+	    NewTerm = Var,
+	    SubTerm = Term
+	;
+	    functor(Term,Name,Arity),
+	    functor(NewTerm,Name,Arity),
+	    get_num(1,Arity,X),
+	    unify_args(Term,NewTerm,Arity,X),
+	    arg(X,Term,ST),
+	    arg(X,NewTerm,NST),
+	    nonvar_subterm(ST,NST,Var,SubTerm)
+	).
+/*PL%^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+\Predicate unify_args/4(Term+,NewTerm+,To+,Omit+).
+
+Unify all args of \verb|Term| with all args of \verb|NewTerm| where
+the argument number is in the range from 1 to \verb|To|. The argument
+with the index \verb|Omit| is not unified.
+
+\PL*/
+unify_args(Term,NewTerm,To,Omit) :-
+	( To < 1    -> true
+        ;   ( To = Omit -> true
+	    ;    arg(To,Term,Arg),
+		 arg(To,NewTerm,Arg)
+	    ),
+	    To1 is To - 1,
+	    unify_args(Term,NewTerm,To1,Omit)
+	).
+/*PL%^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+\Predicate get_num/3(From+,To+,Number?).
+
+Select a number out os an closed interval.  \verb|From| is a number
+and \verb|To| is an arithmetic expression.  \verb|Number | is
+successively unified with all numbers satisfying $From\leq Number\leq
+To$.
+
+\PL*/
+get_num(From,To,Number) :- 
+	From =< To,
+	(   Number = From
+        ;   From1 is From+1,
+	    get_num(From1,To,Number)
+	).
+/*PL%^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+\EndProlog */
+
+

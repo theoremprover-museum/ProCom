@@ -1,0 +1,90 @@
+%%*****************************************************************************
+%% $Id: errors.tex,v 1.1 1995/03/06 23:04:17 gerd Exp $
+%%*****************************************************************************
+%% Author: Gerd Neugebauer
+%%-----------------------------------------------------------------------------
+
+
+\section{\ProCom\ Messages}
+
+\def\MSG#1{\item[#1]\ \\}
+\def\MSGS#1#2{\item[#1]\vspace{-1ex}\item[#2]\ \\}
+
+\begin{description}\itemsep=0pt
+  \MSG{*** ProCom Error: The option prover is not an atom: {\em Prover}}
+  The value of the option |prover| is of the form {\tt procom({\em Prover}\/)}
+  and {\em Prover}\/ is not an atom. The atom should denote a \CaPrI{} module
+  to be used for the compilation.
+
+  This message is issued right after the matrix has been read, i.e. after the
+  filters bt before the reductions are applied.
+
+  \MSG{--- ProCom: CaPrI module {\em Prover}\/ loaded.}
+  The dynamic \CaPrI{} module {\em Prover}\/ has been loaded into \ProTop.
+
+  \MSG{--- ProCom prover {\em Prover}\/ is not applicable.}
+  The prover named in the option |prover| has requirements which are not
+  fulfilled. Thus \ProCom{} will try to find another prover which is
+  applicable.
+
+  \MSG{--- ProCom prover {\em Prover}\/ doesn't fulfill it's requirements.}
+  The prover named in the option |prover| has requirements which are not
+  fulfilled. Thus \ProCom{} will try to find another prover which is
+  applicable.
+
+  \MSG{--- ProCom: Using alternate prover {\em Prover}}
+  A prover {\em Prover}\/ has been found which is applicable.
+
+  \MSG{*** ProCom Error: No prover is applicable.}
+  The attempt to find an applicable prover has failed. This means that the
+  user has to name one or no prove can be started.
+
+  \MSG{--- ProCom: Using dynamic module {\em Prover}}
+  \ProCom{} uses a module which is not initially compiled into the system.
+
+  \MSG{*** ProCom Error: Compilation aborted abnormally.}
+  The compilation failed. This can either be caused by an error which
+  identifies itself with some kind of message or due to a bug in \ProTop.
+
+  \MSG{*** ProCom Error: Prover {\em Prover}\/ is not loaded.}
+  The request to check a prover {\em Prover}\/ which is not loaded has been
+  encountered.
+
+  \MSG{*** ProCom Error: Unspecified descriptor encountered (var).}
+  A descriptor contains a variable where an instruction is expected.
+
+  \MSGS{*** ProCom. Initialization failed for search strategy {\em Search}}
+       {--- Failure ignored. Trying to continue anyway.}
+  The initialization procedure for a search strategy failed. This is usually a
+  bug. The initialization should succeed always. \ProCom{} tries to continue
+  and ignore the misbehaviour.
+
+  \MSGS{*** ProCom. Invalid search strategy selected: {\em Search}}
+       {--- Using iterative\_deepening(1,1,1) instead.}
+  A search strategy has been specified in the option |search| which is not
+  defined for \ProCom. \ProCom{} recovers this error by switching to the
+  iterative deepening search strategy.
+
+  \MSG{*** ProCom ignoring template with variable type: template({\em A},{\em
+      B}\/)}
+  A variable has been found for {\em A}.
+
+  \MSG{*** ProCom Error: Template map has inconsistent length.}
+  An incorrect use of the map directive has been encountered.
+
+  \MSG{*** Library {\em Lib}\/ could not be found.}
+  \MSG{*** Predicate {\em Spec}\/ could not be found.}
+  \MSG{*** Library {\em File}\/ could not be found.}
+  \MSG{*** Reorder module {\em Module}\/ is not loaded.}
+  \MSG{*** Reorder predicate {\em Spec}\/ does not exist in module {\em
+      Module}}
+  \MSG{}
+\end{description}
+
+
+
+%
+% Local Variables: 
+% mode: latex
+% TeX-master: "manual"
+% End: 

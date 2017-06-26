@@ -1,0 +1,104 @@
+%%*****************************************************************************
+%% $Id: pp_meta.pl,v 0.00 1994/06/15 15:34:57 gerd Exp $
+%%*****************************************************************************
+%% Author: Gerd Neugebauer
+%%=============================================================================
+
+:- true. /*%--- Just to make pcode happy. -------------------------------------
+
+\PL*/
+
+:- 	lib(strings).
+
+pp(Clause,Stream) :-
+	copy_term(Clause,CleanClause),
+	term_variables(Clause,Vars),
+	term_variables(Clause,PureVars),
+	pp_goals(Vars,PureVars,Goals),
+	pp_c(CleanClause,Goals,Stream).
+
+pp_goals([],[],true).
+pp_goals([H|T],[PH|PT],Goal) :-
+	( meta(H) ->
+	    Goal = ((PH=H),Goal2)
+	;   Goal = Goal2
+	),
+	pp_goals(T,PT,Goal2).
+
+pp_c((H:-T),G,Stream) :-
+	printf(Stream,"%QDMw :-\n\t",[H]),
+        ( G == true ->
+	    true
+	;   printf(Stream,"%QDMw,\n\t",[G])
+        ),
+	printf(Stream,"%QDMw.\n",[T]).
+
+pp_c(H,G,Stream) :-
+	printf(Stream,"%QDMw",[H]),
+	( G == true ->
+	    printf(Stream,".\n",[])
+	;   printf(Stream," :-\n\t%QDMw.\n",[G])
+        ).
+
+
+%	varlist2varinfo(Vars,VI,1,[],Meta),
+%	( Meta \== [] ->
+%	    pp_clause(Clause,VI,Stream)
+%	;   %numbervars(Clause,1,_),
+%	    writeclause(Stream,Clause)
+%	).
+%	.
+
+varlist2varinfo([],[],_,In,Out).
+varlist2varinfo([V|T],[var(V,No)|TI],No,MetaIn,MetaOut) :-
+	No1 is No+1,
+	( meta(V) ->
+	    Meta = [V+A|MetaIn],
+	    get_meta_attribute(V,A)
+        ;   Meta = MetaIn
+	),
+	varlist2varinfo(T,TI,No1,Meta,MetaOut).
+
+vi_get([var(V,N)|T],Var,No) :-
+	( V == Var ->
+	    No = N
+	;   vi_get(T,Var,No)
+	).
+pp_clause((Head:-Tail),VI,Stream) :-
+	pp_term(Head,VI,Stream),
+	printf(Stream," :-\n",[]),
+	pp_body(Tail,VI),
+	printf(Stream,".\n",[]).
+pp_clause(Head,VI,Stream) :-
+	pp_term(Head,VI,Stream),
+	printf(Stream,".\n",[]).
+
+
+pp_term(Term,VI,Stream) :-
+	var(Term),
+	!,
+	vi_get(VI,Term,No),
+	printf(Stream,"V_%w",[No]).
+pp_term(Term,VI,Stream) :-
+	nonground(Term),
+	!,
+	Term =.. [Functor|Args],
+	printf(Stream,"%w(",[Functor]),
+	pp_term_args(Args,VI,"",Stream),
+	printf(Stream,")",[]).
+pp_term(Term,_,Stream) :-
+	printf(Stream,"%q",[Term]).
+
+pp_term_args([],_,_,_).
+pp_term_args([H|T],VI,Pre,Stream) :-
+	printf(Stream,Pre,[]),
+	pp_term(H,VI,Stream),
+	pp_term_args(T,VI,", ",Stream).
+	
+/*PL%^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+\PL*/
+
+/*PL%^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+\EndProlog */
